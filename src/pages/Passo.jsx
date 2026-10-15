@@ -10,8 +10,8 @@ export function ConteudoPasso({ produtoNome, etapaTitulo, passo }) {
     <article className="conteudo-passo">
       <p className="sobre">{produtoNome} · {etapaTitulo}</p>
       <h1>{passo.titulo}</h1>
-      <Video url={passo.video} titulo={passo.titulo} />
       <Texto texto={passo.texto} />
+      <Video url={passo.video} titulo={passo.titulo} />
     </article>
   )
 }

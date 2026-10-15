@@ -71,13 +71,13 @@ function FormPasso({ sel, salvo }) {
         <p className="sobre">{sel.produto.nome} · {sel.etapa.titulo}</p>
         <label>Título do passo<input value={form.titulo} onChange={campo('titulo')} /></label>
         <label>
+          Texto
+          <textarea rows={10} value={form.texto} onChange={campo('texto')} placeholder={'Explique o que o cliente deve fazer neste passo.\n\nDeixe uma linha em branco entre parágrafos.\n- Linhas começando com hífen viram lista'} />
+        </label>
+        <label>
           Link do vídeo no YouTube
           <input value={form.video} onChange={campo('video')} placeholder="https://youtu.be/…" />
           {videoInvalido && <span className="erro-campo">Não reconheci este link do YouTube.</span>}
-        </label>
-        <label>
-          Texto
-          <textarea rows={10} value={form.texto} onChange={campo('texto')} placeholder={'Explique o que o cliente deve fazer neste passo.\n\nDeixe uma linha em branco entre parágrafos.\n- Linhas começando com hífen viram lista'} />
         </label>
         {msg && <div className="alerta ok">{msg}</div>}
         <div className="acoes">
