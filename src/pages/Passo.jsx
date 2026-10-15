@@ -34,7 +34,7 @@ export default function Passo({ estado, hotelId, passoId }) {
     setSalvando(true)
     const ok = await tentar(() => concluirPasso(hotelId, u.id))
     setSalvando(false)
-    if (ok) window.location.hash = linkProx ? linkProx.slice(1) : '/'
+    if (ok) window.location.hash = linkProx ? linkProx.slice(1) : '/implantacao'
   }
 
   return (

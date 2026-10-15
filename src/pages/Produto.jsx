@@ -12,7 +12,7 @@ export default function Produto({ estado, hotelId, codigo }) {
 
   return (
     <>
-      <a href="#/" className="voltar">← Minha implantação</a>
+      <a href="#/implantacao" className="voltar">← Minha implantação</a>
       <header className="cabecalho cabecalho-produto" style={{ '--cor': seg.cor }}>
         <div>
           <h1>{seg.nome}</h1>
@@ -59,7 +59,7 @@ export function Voltar({ texto }) {
   return (
     <div className="cartao vazio-cartao">
       <p>{texto}</p>
-      <a className="btn" href="#/">Voltar para minha implantação</a>
+      <a className="btn" href="#/implantacao">Voltar para minha implantação</a>
     </div>
   )
 }

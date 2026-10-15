@@ -52,7 +52,7 @@ export default function Jornada({ estado, usuario, hotelId }) {
                     </div>
                     <Selo status={st} />
                   </div>
-                  {ids.length > 0 && (
+                  {ids.length > 0 && st !== 'bloqueado' && (
                     <div className="jornada-progresso">
                       <Barra pct={pct} fina />
                       <span className="pequeno muted">{feitos}/{ids.length} passos</span>

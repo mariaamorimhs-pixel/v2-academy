@@ -10,6 +10,8 @@ import Hoteis from './pages/Hoteis.jsx'
 import Hotel from './pages/Hotel.jsx'
 import Editor from './pages/Editor.jsx'
 import Analistas from './pages/Analistas.jsx'
+import Inicio from './pages/Inicio.jsx'
+import { TutoriaisProduto, TutorialPasso } from './pages/Tutoriais.jsx'
 
 const SIMULACAO = 'implantacao-hibrida-simulando'
 
@@ -20,7 +22,7 @@ const lerRota = () => {
 }
 
 const MENU = {
-  cliente: [{ rota: '', rotulo: 'Minha implantação' }],
+  cliente: [{ rota: '', rotulo: 'Início' }, { rota: 'implantacao', rotulo: 'Minha implantação' }],
   analista: [{ rota: '', rotulo: 'Meus hotéis' }],
   editora: [{ rota: '', rotulo: 'Conteúdo' }, { rota: 'hoteis', rotulo: 'Hotéis' }, { rota: 'analistas', rotulo: 'Analistas' }],
 }
@@ -85,7 +87,10 @@ export default function App() {
       pagina === 'produto' ? <Produto {...props} codigo={param} />
       : pagina === 'passo' ? <Passo {...props} passoId={param} />
       : pagina === 'reuniao' ? <Reuniao {...props} numero={Number(param)} />
-      : <Jornada {...props} />
+      : pagina === 'implantacao' ? <Jornada {...props} />
+      : pagina === 'tutoriais' ? <TutoriaisProduto estado={estado} codigo={param} />
+      : pagina === 'tutorial' ? <TutorialPasso estado={estado} passoId={param} />
+      : <Inicio {...props} />
   } else if (usuario.perfil === 'analista') {
     conteudo = pagina === 'hotel' ? <Hotel estado={estado} usuario={usuario} hotelId={param} /> : <Hoteis estado={estado} usuario={usuario} />
   } else {
@@ -97,7 +102,9 @@ export default function App() {
   }
 
   const hotel = usuario.hotelId && estado.hoteis.find((h) => h.id === usuario.hotelId)
-  const ativa = pagina === 'hoteis' || (usuario.perfil === 'editora' && pagina === 'hotel') ? 'hoteis' : pagina === 'analistas' ? 'analistas' : ''
+  const ativa = usuario.perfil === 'cliente'
+    ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'implantacao' : '')
+    : pagina === 'hoteis' || (usuario.perfil === 'editora' && pagina === 'hotel') ? 'hoteis' : pagina === 'analistas' ? 'analistas' : ''
 
   return (
     <div className="layout">

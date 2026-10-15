@@ -98,4 +98,14 @@ export const CATALOGO = Object.fromEntries(
 )
 
 export const nomeProduto = (codigo) => CATALOGO[codigo]?.nome ?? codigo
-export const corProduto = (codigo) => CATALOGO[codigo]?.cor ?? '#8a919c'
+// Treinamentos ao vivo em grupo: agendas de turma no Calendly da HSystem. O hai não tem turma.
+export const TREINAMENTOS_GRUPO = [
+  { id: 'hbook', titulo: 'hbook', descricao: 'Motor de reservas', cor: '#5d288e', url: 'https://calendly.com/treinamentoshsystem/treinamento-em-grupo-do-hbook' },
+  { id: 'hunit-hcorp', titulo: 'hunit e hcorp', descricao: 'Channel manager e gestão de redes', cor: '#798d2a', url: 'https://calendly.com/treinamentoshsystem/treinamento-em-grupo-do-hunit-e-hcorp' },
+  { id: 'hprice', titulo: 'hprice', descricao: 'Inteligência de preços', cor: '#ed6c00', url: 'https://calendly.com/treinamentoshsystem/treinamento-em-grupo-do-hprice' },
+]
+
+// Ordem dos cartões de tutoriais (todos os produtos, sem trava).
+export const ORDEM_TUTORIAIS = ['HBOOK', 'HUNIT', 'HBOT', 'HPRICE', 'HCORP']
+
+export const corProduto =(codigo) => CATALOGO[codigo]?.cor ?? '#8a919c'

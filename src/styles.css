@@ -157,6 +157,56 @@ a.jornada-cartao:hover { border-color: var(--border-forte); }
 .cabecalho-produto h1 { display: flex; align-items: center; gap: 12px; }
 .cabecalho-produto h1::before { content: ''; width: 6px; height: 28px; border-radius: 3px; background: var(--cor); }
 
+/* itens bloqueados da jornada: compactos, para o olhar ficar no que está liberado */
+.jornada-item.bloqueado .jornada-cartao { padding: 10px 20px; }
+.jornada-item.bloqueado .marca { margin-top: 12px; }
+.jornada-item.bloqueado:not(:last-child)::before { top: 34px; }
+
+/* ---- início do cliente ---- */
+.inicio-cabeca { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.inicio-cabeca h1 { font-size: 32px; margin: 0; }
+.destaque-nome { color: var(--marca); }
+.implantacao-destaque { border-left: 6px solid var(--cor); padding: 24px 28px; display: flex; flex-direction: column; gap: 2px; }
+.implantacao-topo { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.implantacao-topo .sobre { margin: 0; }
+.proximo-passo { font-size: 24px; letter-spacing: -0.02em; margin: 2px 0 4px; }
+.implantacao-rodape { display: flex; align-items: center; gap: 16px; margin: 14px 0 10px; flex-wrap: wrap; }
+.implantacao-rodape .barra { flex: 1 1 200px; }
+.implantacao-rodape .barra span { background: var(--cor); }
+.implantacao-destaque > .link { align-self: flex-start; }
+.implantacao-concluida { display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit; }
+.secao { margin-top: 36px; }
+.secao-titulo { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+.secao > .muted { margin-bottom: 12px; }
+.lista-treinos { list-style: none; margin: 0; padding: 4px 20px; }
+.lista-treinos li { display: grid; grid-template-columns: 160px 1fr auto; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.lista-treinos li:last-child { border-bottom: 0; }
+.grade-tutoriais { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-top: 12px; }
+.cartao-tutorial { position: relative; min-height: 170px; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; padding: 18px; border-radius: var(--radius);
+  background: color-mix(in srgb, var(--cor) 8%, white); border: 1px solid color-mix(in srgb, var(--cor) 25%, white); color: var(--text); text-decoration: none; transition: border-color .15s, transform .15s; }
+a.cartao-tutorial:hover { border-color: var(--cor); transform: translateY(-2px); }
+.cartao-tutorial b { font-size: 22px; letter-spacing: -0.02em; }
+.cartao-tutorial span:last-child { font-size: 13.5px; color: color-mix(in srgb, var(--cor) 75%, black); }
+.cartao-tutorial .seta { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--surface); border: 1px solid color-mix(in srgb, var(--cor) 30%, white); color: var(--cor); font-weight: 600; }
+.cartao-tutorial.vazio { opacity: .55; }
+.seta-passo { width: 22px; text-align: center; color: var(--muted); font-size: 18px; }
+.janela-fundo { position: fixed; inset: 0; z-index: 20; background: rgba(13, 15, 18, .55); display: grid; place-items: center; padding: 24px; }
+.janela { width: min(1000px, 100%); height: min(760px, 100%); background: var(--surface); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
+.janela header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+.janela iframe { flex: 1; width: 100%; border: 0; }
+@media (max-width: 640px) {
+  .inicio-cabeca h1 { font-size: 24px; }
+  .implantacao-destaque { padding: 20px; }
+  .proximo-passo { font-size: 20px; }
+  .lista-treinos li { grid-template-columns: 1fr; gap: 4px; }
+  .lista-treinos li .btn { justify-self: start; margin-top: 6px; }
+  .grade-tutoriais { grid-template-columns: 1fr 1fr; }
+  .cartao-tutorial { min-height: 130px; }
+  .janela-fundo { padding: 0; }
+  .janela { height: 100%; border-radius: 0; }
+}
+
 /* ---- trilha do produto ---- */
 .etapas { display: flex; flex-direction: column; gap: 12px; }
 .etapa { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--sombra); }

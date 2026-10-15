@@ -29,7 +29,7 @@ export default function Reuniao({ estado, hotelId, numero }) {
 
   return (
     <>
-      <a href="#/" className="voltar">← Minha implantação</a>
+      <a href="#/implantacao" className="voltar">← Minha implantação</a>
       <header className="cabecalho">
         <div>
           <h1>{nomeReuniao(seg)} com {analista?.nome ?? 'seu analista'}</h1>
@@ -40,7 +40,7 @@ export default function Reuniao({ estado, hotelId, numero }) {
       {st === 'concluido' ? (
         <div className="cartao">
           <p className="ok-texto">Reunião realizada em {fmtDataHora(r.realizadaEm)}</p>
-          <a className="btn primario" href="#/">Ver o próximo módulo</a>
+          <a className="btn primario" href="#/implantacao">Ver o próximo módulo</a>
         </div>
       ) : r.agendadaEm && !reagendar ? (
         <div className="cartao">
