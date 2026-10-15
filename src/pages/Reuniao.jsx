@@ -1,0 +1,79 @@
+import { useEffect, useState } from 'react'
+import { dadosDoHotel, fmtDataHora, nomeReuniao, assuntoReuniao, tentar } from '../comum.jsx'
+import { nomeProduto } from '../trilhas.js'
+import { agendarReuniao } from '../dados.js'
+import { Voltar } from './Produto.jsx'
+
+// Agendamento da reunião do fim do módulo pelo Calendly do analista do hotel.
+// O próximo bloco só abre quando o analista marca "Reunião realizada".
+export default function Reuniao({ estado, hotelId, numero }) {
+  const { jornada, progresso, prog, analista } = dadosDoHotel(estado, hotelId)
+  const seg = jornada.find((s) => s.tipo === 'reuniao' && s.numero === numero)
+  const [reagendar, setReagendar] = useState(false)
+
+  // O Calendly avisa a página quando a pessoa conclui o agendamento no widget embutido.
+  useEffect(() => {
+    const aoReceber = (e) => {
+      if (e.origin === 'https://calendly.com' && e.data?.event === 'calendly.event_scheduled') {
+        tentar(() => agendarReuniao(hotelId, numero, null)).then((ok) => ok && setReagendar(false))
+      }
+    }
+    window.addEventListener('message', aoReceber)
+    return () => window.removeEventListener('message', aoReceber)
+  }, [hotelId, numero])
+
+  if (!seg) return <Voltar texto="Reunião não encontrada." />
+  const st = prog.status[seg.id]
+  if (st === 'bloqueado') return <Voltar texto={`A ${nomeReuniao(seg)} abre quando você concluir a trilha de ${assuntoReuniao(seg, nomeProduto)}.`} />
+  const r = progresso.reunioes?.[numero] ?? {}
+
+  return (
+    <>
+      <a href="#/" className="voltar">← Minha implantação</a>
+      <header className="cabecalho">
+        <div>
+          <h1>{nomeReuniao(seg)} com {analista?.nome ?? 'seu analista'}</h1>
+          <p className="muted">Vamos revisar juntos o que você configurou em {assuntoReuniao(seg, nomeProduto)} e tirar suas dúvidas.</p>
+        </div>
+      </header>
+
+      {st === 'concluido' ? (
+        <div className="cartao">
+          <p className="ok-texto">Reunião realizada em {fmtDataHora(r.realizadaEm)}</p>
+          <a className="btn primario" href="#/">Ver o próximo módulo</a>
+        </div>
+      ) : r.agendadaEm && !reagendar ? (
+        <div className="cartao">
+          <h2>{r.agendadaPara ? `Marcada para ${fmtDataHora(r.agendadaPara)}` : 'Reunião marcada pelo Calendly'}</h2>
+          <p className="muted">Você recebe o convite por e-mail. Assim que {analista?.nome.split(' ')[0] ?? 'o analista'} confirmar que a reunião aconteceu, o próximo módulo é liberado.</p>
+          <button className="btn fantasma" onClick={() => setReagendar(true)}>Reagendar</button>
+        </div>
+      ) : (
+        <Agendar analista={analista} onAgendar={async (quando) => { if (await tentar(() => agendarReuniao(hotelId, numero, quando))) setReagendar(false) }} />
+      )}
+    </>
+  )
+}
+
+function Agendar({ analista, onAgendar }) {
+  const [quando, setQuando] = useState('')
+  if (analista?.calendly) {
+    const url = `${analista.calendly}${analista.calendly.includes('?') ? '&' : '?'}embed_type=Inline&hide_gdpr_banner=1&embed_domain=${window.location.hostname}`
+    return (
+      <div className="cartao calendly">
+        <iframe src={url} title="Agenda do analista" />
+      </div>
+    )
+  }
+  // Demonstração: ainda não temos os links do Calendly dos analistas.
+  return (
+    <div className="cartao">
+      <h2>Escolha um horário</h2>
+      <p className="muted pequeno">A agenda online do seu analista ainda não foi configurada. Escolha uma data e hora e ele confirma com você.</p>
+      <div className="linha-form">
+        <label>Data e hora<input type="datetime-local" value={quando} onChange={(e) => setQuando(e.target.value)} /></label>
+        <button className="btn primario" disabled={!quando} onClick={() => onAgendar(new Date(quando).toISOString())}>Confirmar agendamento</button>
+      </div>
+    </div>
+  )
+}
