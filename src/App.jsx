@@ -11,6 +11,7 @@ import Hotel from './pages/Hotel.jsx'
 import Editor from './pages/Editor.jsx'
 import Analistas from './pages/Analistas.jsx'
 import Inicio from './pages/Inicio.jsx'
+import Dashboard from './pages/Dashboard.jsx'
 import { AlternarTema } from './tema.jsx'
 import { TutoriaisProduto, TutorialPasso } from './pages/Tutoriais.jsx'
 
@@ -25,7 +26,7 @@ const lerRota = () => {
 const MENU = {
   cliente: [{ rota: '', rotulo: 'Início' }, { rota: 'implantacao', rotulo: 'Minha implantação' }],
   analista: [{ rota: '', rotulo: 'Meus hotéis' }],
-  editora: [{ rota: '', rotulo: 'Conteúdo' }, { rota: 'hoteis', rotulo: 'Hotéis' }, { rota: 'analistas', rotulo: 'Analistas' }],
+  editora: [{ rota: '', rotulo: 'Conteúdo' }, { rota: 'dashboard', rotulo: 'Dashboard' }, { rota: 'hoteis', rotulo: 'Hotéis' }, { rota: 'analistas', rotulo: 'Analistas' }],
 }
 
 // Título da aba por tela: "Início · HSystem Academy", "Minha implantação · HSystem Academy"…
@@ -33,7 +34,7 @@ function tituloDaAba(perfil, pagina) {
   const nome = perfil === 'cliente'
     ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'Minha implantação' : ['tutoriais', 'tutorial'].includes(pagina) ? 'Tutoriais' : 'Início')
     : pagina === 'hoteis' || pagina === 'hotel' || (perfil === 'analista' && !pagina) ? (perfil === 'analista' ? 'Meus hotéis' : 'Hotéis')
-    : pagina === 'analistas' ? 'Analistas' : 'Conteúdo'
+    : pagina === 'analistas' ? 'Analistas' : pagina === 'dashboard' ? 'Dashboard' : 'Conteúdo'
   return `${nome} · HSystem Academy`
 }
 
@@ -108,6 +109,7 @@ export default function App() {
     conteudo =
       pagina === 'hoteis' ? <Hoteis estado={estado} usuario={usuario} todos />
       : pagina === 'analistas' ? <Analistas estado={estado} />
+      : pagina === 'dashboard' ? <Dashboard estado={estado} />
       : pagina === 'hotel' ? <Hotel estado={estado} usuario={usuario} hotelId={param} onSimular={simular} />
       : <Editor estado={estado} passoId={pagina === 'passo' ? param : null} />
   }
@@ -115,7 +117,7 @@ export default function App() {
   const hotel = usuario.hotelId && estado.hoteis.find((h) => h.id === usuario.hotelId)
   const ativa = usuario.perfil === 'cliente'
     ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'implantacao' : '')
-    : pagina === 'hoteis' || (usuario.perfil === 'editora' && pagina === 'hotel') ? 'hoteis' : pagina === 'analistas' ? 'analistas' : ''
+    : pagina === 'hoteis' || (usuario.perfil === 'editora' && pagina === 'hotel') ? 'hoteis' : pagina === 'analistas' ? 'analistas' : pagina === 'dashboard' ? 'dashboard' : ''
 
   return (
     <div className="layout">

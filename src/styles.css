@@ -449,3 +449,43 @@ html[data-tema="escuro"] .marca-sistema { background: #fff; border-radius: 10px;
 html[data-tema="escuro"] .login-marca img { background: #fff; border-radius: 12px; padding: 4px 12px; }
 html[data-tema="escuro"] .video.vazio, html[data-tema="escuro"] .em-preparo { background: var(--surface-apagada); }
 @media (max-width: 640px) { .quem { gap: 8px; } }
+
+/* ---- Dashboard da editora ---- */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.check-filtro { flex-direction: row; align-items: center; gap: 10px; min-height: 44px; padding: 0 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+  color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer; }
+.check-filtro input { width: 18px; height: 18px; accent-color: var(--accent); }
+/* números gerais: cartões de número, sem gráfico */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-top: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--sombra); padding: 18px 20px; display: flex; flex-direction: column; gap: 4px; }
+.kpi-rotulo { font-size: 14px; font-weight: 600; color: var(--muted); }
+.kpi-valor { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; color: var(--text); font-variant-numeric: tabular-nums; }
+.kpi-detalhe { font-size: 13px; color: var(--muted); }
+.kpi.alerta { border-color: color-mix(in srgb, var(--warn) 45%, var(--border)); }
+.kpi.alerta .kpi-rotulo { color: var(--warn); }
+/* por produto: números e funil por etapa (uma cor só por gráfico: a do produto) */
+.grade-produtos-dash { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr)); gap: 16px; margin-top: 12px; }
+.produto-dash > header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+.produto-dash h3 { margin: 0; font-size: 18px; text-transform: none; color: var(--text); letter-spacing: -0.01em; }
+.produto-dash-numeros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 16px; }
+.produto-dash-numeros div { background: var(--bg); border-radius: 10px; padding: 10px 12px; }
+.produto-dash-numeros dt { font-size: 13px; color: var(--muted); font-weight: 600; }
+.produto-dash-numeros dd { margin: 2px 0 0; font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.funil { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.funil li { display: grid; grid-template-columns: minmax(120px, 1.3fr) minmax(80px, 1fr) 46px 132px; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 8px; font-size: 14px; }
+.funil li:hover { background: var(--linha-hover); }
+.funil-etapa { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.funil-barra { height: 10px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+.funil-barra span { display: block; height: 100%; background: var(--cor); border-radius: 0 4px 4px 0; min-width: 2px; }
+.funil-valor { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.funil-agora { font-size: 13px; white-space: nowrap; }
+@media (max-width: 640px) {
+  .funil li { grid-template-columns: 1fr 46px; row-gap: 4px; }
+  .funil-barra { grid-column: 1 / -1; grid-row: 2; }
+  .funil-agora { grid-column: 1 / -1; }
+  .produto-dash-numeros dd { font-size: 18px; }
+}
+/* no escuro, as barras na cor do produto ficam mais claras para destacar do fundo (roxo do hbook ~4:1) */
+html[data-tema="escuro"] .funil-barra span,
+html[data-tema="escuro"] .cartao-jornada-rodape .barra span,
+html[data-tema="escuro"] .jornada-progresso .barra span { background: color-mix(in srgb, var(--cor) 65%, white); }
