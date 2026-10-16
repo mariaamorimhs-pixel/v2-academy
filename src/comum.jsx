@@ -1,6 +1,7 @@
 // Peças usadas em várias telas: datas, vídeo do YouTube, texto, barra de progresso e ícones de status.
 import { useEffect, useRef, useState } from 'react'
 import { montarJornada, calcularProgresso } from './regras.js'
+import { CATALOGO } from './trilhas.js'
 
 // Executa uma ação no banco e avisa se der erro (sem rede, sem permissão…). Devolve true se deu certo.
 export async function tentar(fn) {
@@ -89,7 +90,7 @@ export function ProgressoImplantacao({ prog }) {
 export function textoDesbloqueio(jornada, seg) {
   const anterior = jornada[jornada.indexOf(seg) - 1]
   if (!anterior) return 'Bloqueado'
-  return anterior.tipo === 'reuniao' ? `Libera após a ${nomeReuniao(anterior)}` : `Libera ao concluir ${anterior.nome}`
+  return anterior.tipo === 'reuniao' ? `Libera após a ${nomeReuniao(anterior)}` : `Libera ao concluir ${CATALOGO[anterior.codigo]?.marca ?? anterior.nome}`
 }
 
 export function Barra({ pct, fina, rotulo }) {

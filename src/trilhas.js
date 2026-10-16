@@ -15,6 +15,9 @@ const etapa = (titulo, passos, extra = {}) => ({
 const DEFINICAO = {
   HBOOK: {
     nome: 'hbook',
+    marca: 'HBook',
+    subtitulo: 'Motor de Reservas',
+    resumo: 'Aprenda a utilizar o HBook no dia a dia do seu hotel. Ao final do treinamento, seu site vai gerar reservas diretas, sem comissões.',
     cor: '#5d288e',
     descricao: 'Motor de reservas',
     etapas: [
@@ -30,6 +33,9 @@ const DEFINICAO = {
   },
   HUNIT: {
     nome: 'hunit',
+    marca: 'HUnit',
+    subtitulo: 'Gestor de Canais',
+    resumo: 'Aprenda a utilizar o HUnit no dia a dia do seu hotel para distribuir tarifas e disponibilidade em todos os canais ao mesmo tempo, sem overbooking.',
     cor: '#798d2a',
     descricao: 'Channel manager',
     etapas: [
@@ -44,12 +50,18 @@ const DEFINICAO = {
   },
   HCORP: {
     nome: 'hcorp',
+    marca: 'HCorp',
+    subtitulo: 'Gestão de Redes',
+    resumo: 'Aprenda a utilizar o HCorp para acompanhar e gerenciar todas as unidades da sua rede em um só lugar.',
     cor: '#8a919c', // provisória: cor ainda não definida
     descricao: 'Trilha em preparação',
     etapas: [],
   },
   HBOT: {
     nome: 'hai',
+    marca: 'HAI',
+    subtitulo: 'Atendimento com IA',
+    resumo: 'Aprenda a utilizar o HAI no dia a dia do seu hotel para atender e converter hóspedes a qualquer momento, sem sobrecarregar sua equipe.',
     cor: '#1f7ecc',
     descricao: 'Atendente com IA',
     etapas: [
@@ -66,6 +78,9 @@ const DEFINICAO = {
   },
   HPRICE: {
     nome: 'hprice',
+    marca: 'HPrice',
+    subtitulo: 'Inteligência de Preços',
+    resumo: 'Aprenda a utilizar o HPrice no dia a dia do seu hotel para definir preços com base no mercado e vender mais, com mais margem.',
     cor: '#ed6c00',
     descricao: 'Inteligência de preços',
     etapas: [

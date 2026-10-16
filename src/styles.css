@@ -344,3 +344,59 @@ button.link { min-height: 44px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+
+/* ---- Minha implantação: barra "Sua jornada" + passo a passo em zigue-zague ---- */
+.jornada-saudacao { margin-bottom: 16px; }
+.sua-jornada { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; box-shadow: var(--sombra); color: var(--text); text-decoration: none; }
+a.sua-jornada:hover { border-color: var(--border-forte); }
+.sua-jornada-rotulo { font-size: 14px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.sua-jornada .barra { flex: 1 1 200px; height: 8px; }
+.sua-jornada .barra span { background: var(--accent); }
+.sua-jornada-fase { font-size: 15px; font-weight: 600; }
+.sua-jornada-resumo { font-size: 14px; color: var(--muted); }
+.sua-jornada .chevron, .cartao-jornada .chevron { color: var(--muted); flex: none; }
+.passo-a-passo-titulo { color: var(--accent); margin: 32px 0 16px; font-size: 14px; }
+
+.passo-a-passo { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 48px; }
+.etapa-jornada { position: relative; width: 64%; }
+.etapa-jornada:nth-child(even) { align-self: flex-end; }
+/* linha tracejada ligando um card ao próximo */
+.etapa-jornada:not(:first-child)::before { content: ''; position: absolute; top: -48px; height: 48px; background-repeat: no-repeat; background-size: 100% 100%; pointer-events: none; }
+.etapa-jornada:nth-child(even)::before { left: -14%; width: 24%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M2 2 C45 2 55 98 98 98' fill='none' stroke='%23cfd4dc' stroke-width='2' stroke-dasharray='7 7' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.etapa-jornada:nth-child(odd):not(:first-child)::before { left: 14%; width: 44%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M98 2 C55 2 45 98 2 98' fill='none' stroke='%23cfd4dc' stroke-width='2' stroke-dasharray='7 7' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+
+.cartao-jornada { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px 18px; box-shadow: var(--sombra);
+  color: var(--text); text-decoration: none; transition: border-color .15s, box-shadow .15s; }
+a.cartao-jornada:hover { border-color: var(--border-forte); box-shadow: 0 6px 18px rgba(16, 24, 40, .08); }
+.etapa-jornada.atual .cartao-jornada { border-color: var(--cor, var(--accent)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor, var(--accent)) 15%, white); }
+.etapa-jornada.bloqueado .cartao-jornada { background: #fafbfc; box-shadow: none; }
+.cartao-jornada-topo { display: flex; align-items: center; gap: 14px; }
+.cartao-jornada .marca, .icone-final { width: 46px; height: 46px; flex: none; }
+.cartao-jornada .marca svg { width: 20px; height: 20px; }
+.etapa-jornada.atual .marca { border-color: var(--cor); box-shadow: inset 0 0 0 7px var(--surface), inset 0 0 0 23px var(--cor); }
+.icone-final { border-radius: 50%; display: grid; place-items: center; font-size: 22px; background: var(--bg); border: 2px solid var(--border-forte); }
+.etapa-jornada.final.concluido .icone-final { background: var(--ok); border-color: var(--ok); }
+.cartao-jornada-tipo { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: color-mix(in srgb, var(--cor, var(--accent)) 75%, black); }
+.etapa-jornada.bloqueado .cartao-jornada-tipo { color: var(--muted); }
+.cartao-jornada h3 { margin: 2px 0 0; font-size: 20px; line-height: 1.25; letter-spacing: -0.01em; text-transform: none; color: var(--text); }
+.etapa-jornada.bloqueado .cartao-jornada h3 { color: var(--muted); }
+.cartao-jornada-texto { margin: 14px 0 0; color: var(--muted); }
+.cartao-jornada-nota { margin: 8px 0 0; font-size: 14px; font-weight: 600; color: var(--text); }
+.etapa-jornada.bloqueado .cartao-jornada-nota { color: var(--muted); font-weight: 500; }
+.cartao-jornada-rodape { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+.cartao-jornada-rodape .barra { flex: 1; height: 7px; }
+.cartao-jornada-rodape .barra span { background: var(--cor); }
+
+@media (max-width: 760px) {
+  .passo-a-passo { gap: 32px; }
+  .etapa-jornada, .etapa-jornada:nth-child(even) { width: 100%; align-self: stretch; }
+  .etapa-jornada:not(:first-child)::before, .etapa-jornada:nth-child(even)::before, .etapa-jornada:nth-child(odd):not(:first-child)::before {
+    left: 46px; width: 0; top: -32px; height: 32px; background: none; border-left: 2px dashed #cfd4dc; }
+  .cartao-jornada { padding: 18px; }
+  .cartao-jornada h3 { font-size: 18px; }
+}
+/* verde mais vivo nos círculos de concluído do passo a passo, como na referência (3,3:1 com o ✓ branco) */
+.cartao-jornada .marca.concluido, .etapa-jornada.final.concluido .icone-final { background: #16a34a; border-color: #16a34a; }
