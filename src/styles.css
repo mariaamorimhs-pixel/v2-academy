@@ -1,32 +1,67 @@
-/* Identidade HSystem Academy: branco, preto e o azul da marca (#2196F3).
-   O azul da marca vai em barras, marcas e destaques; em botões e links com texto usamos o tom
-   #1976D2 da mesma família, porque branco sobre #2196F3 fica com contraste baixo (3,1:1).
-   Cada produto tem sua cor (--cor nos cartões), definida em src/trilhas.js. */
+/* Identidade HSystem Academy no padrão visual dos produtos HSystem (extranet do HBook):
+   mesma tipografia (Segoe UI), tons neutros, cards com cantos de 16px e sombra longa, botões de 48px
+   com degradê na cor da marca. A marca do Academy é o azul #2196F3; texto e botões usam o tom
+   #1976D2 (branco sobre #2196F3 tem contraste baixo). Cada produto tem sua cor (--cor), em src/trilhas.js.
+   Modo escuro: html[data-tema="escuro"] troca só as variáveis abaixo. */
 :root {
   color-scheme: light;
-  --bg: #f4f5f7;
+  --bg: #f4f5f8;
   --surface: #ffffff;
-  --border: #e3e6eb;
-  --border-forte: #cfd4dc;
-  --text: #0d0f12;
-  --muted: #646b78;
+  --surface-apagada: #fafafc;
+  --linha-hover: #f7f7fa;
+  --border: #e6e4ec;
+  --border-forte: #d2d0da;
+  --text: #2c2c30;
+  --muted: #6e6e76;
   --marca: #2196f3;
   --accent: #1976d2;
   --accent-hover: #1565c0;
   --accent-bg: #e8f3fe;
+  --accent-forte: #1565c0; /* texto azul sobre fundo azul-claro (5,2:1) */
+  --accent-selecionado: #d3e6fb;
+  --botao-degrade: linear-gradient(120deg, #1565c0, #1976d2 55%, #2196f3);
+  --mistura-cor: black;
+  --mistura-pct: 75%; /* quanto da cor do produto entra nos rótulos coloridos */
   --ok: #1d7a4c;
   --ok-bg: #e5f4ec;
   --warn: #9a5b00;
   --warn-bg: #fdf1dc;
   --crit: #b4271f;
   --crit-bg: #fbe7e5;
-  --radius: 10px;
-  --sombra: 0 1px 2px rgba(16, 24, 40, .05);
+  --radius: 16px;
+  --sombra: 0 1px 2px rgba(20, 20, 30, .04), 0 10px 28px -14px rgba(20, 20, 30, .18);
+  --sombra-alta: 0 1px 2px rgba(20, 20, 30, .05), 0 14px 30px -12px rgba(20, 20, 30, .25);
+}
+html[data-tema="escuro"] {
+  color-scheme: dark;
+  --bg: #0f1115;
+  --surface: #181b21;
+  --surface-apagada: #14171c;
+  --linha-hover: #1e2229;
+  --border: #2a2e37;
+  --border-forte: #3b404b;
+  --text: #ececf1;
+  --muted: #a6a9b3;
+  --accent: #6cb4f5;
+  --accent-hover: #93c8f8;
+  --accent-bg: #142a40;
+  --accent-forte: #93c8f8;
+  --accent-selecionado: #1b3a5a;
+  --mistura-cor: white;
+  --mistura-pct: 55%;
+  --ok: #4ade80;
+  --ok-bg: #11301f;
+  --warn: #f5b454;
+  --warn-bg: #3a2a10;
+  --crit: #f87171;
+  --crit-bg: #3b1716;
+  --sombra: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px -14px rgba(0, 0, 0, .7);
+  --sombra-alta: 0 1px 2px rgba(0, 0, 0, .5), 0 14px 30px -12px rgba(0, 0, 0, .8);
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 Figtree, 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
-h1 { font-size: 26px; line-height: 1.2; letter-spacing: -0.02em; margin: 0 0 6px; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 'Segoe UI', Figtree, system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+h1 { font-size: 24px; font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; margin: 0 0 6px; }
 h2 { font-size: 16px; line-height: 1.3; margin: 0; }
 h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 16px 0 6px; }
 p { margin: 0 0 8px; }
@@ -34,7 +69,7 @@ a { color: var(--accent); }
 code { font: 13px ui-monospace, SFMono-Regular, Consolas, monospace; background: var(--bg); padding: 2px 6px; border-radius: 4px; }
 .muted { color: var(--muted); }
 .pequeno { font-size: 13px; }
-.sobre { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 6px; }
+.sobre { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); margin-bottom: 6px; }
 
 /* ---- estrutura ---- */
 .faixa-demo { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 6px 16px; font-size: 13px; background: var(--warn-bg); color: var(--warn); }
@@ -45,15 +80,16 @@ code { font: 13px ui-monospace, SFMono-Regular, Consolas, monospace; background:
 .marca-sistema img { height: 66px; width: auto; display: block; margin: -6px -16px -6px -18px; }
 .marca-sistema .logo-simbolo { display: none; height: 52px; margin: -6px -10px; }
 .topo nav { display: flex; gap: 4px; flex: 1; overflow-x: auto; }
-.topo nav a { text-decoration: none; color: var(--muted); font-weight: 500; font-size: 14px; padding: 8px 12px; border-radius: 8px; white-space: nowrap; }
-.topo nav a:hover { color: var(--text); background: var(--bg); }
-.topo nav a.ativa { color: var(--text); background: var(--bg); }
+.topo nav a { text-decoration: none; color: var(--muted); font-weight: 600; font-size: 14px; padding: 8px 14px; border-radius: 8px; white-space: nowrap; }
+.topo nav a:hover { color: var(--text); background: var(--accent-bg); }
+/* item ativo em pílula na cor da marca, como na extranet */
+.topo nav a.ativa { color: #fff; background: var(--botao-degrade); }
 .quem { display: flex; align-items: center; gap: 12px; margin-left: auto; }
 .quem > span { display: flex; flex-direction: column; text-align: right; line-height: 1.25; font-size: 13px; }
 .quem small { color: var(--muted); font-size: 13px; }
 .pagina { max-width: 1120px; margin: 0 auto; padding: 28px 24px 64px; }
 
-.cartao { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--sombra); }
+.cartao { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--sombra); }
 .cabecalho { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; margin-bottom: 20px; }
 .cabecalho > div:first-child { min-width: 0; flex: 1 1 360px; }
 .cabecalho-barra { flex: 0 1 280px; display: flex; flex-direction: column; gap: 6px; }
@@ -61,14 +97,14 @@ code { font: 13px ui-monospace, SFMono-Regular, Consolas, monospace; background:
 .voltar:hover { text-decoration: underline; }
 
 /* ---- controles ---- */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font: inherit; font-size: 14px; font-weight: 600; border: 1px solid var(--border-forte); background: var(--surface); color: var(--text); border-radius: 8px; padding: 9px 16px; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: inherit; font-size: 15px; font-weight: 600; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 8px; padding: 11px 20px; min-height: 48px; cursor: pointer; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px rgba(20, 20, 30, .04); }
 .btn:hover:not(:disabled) { background: var(--bg); }
 .btn:disabled { opacity: .45; cursor: default; }
-.btn.primario { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn.primario:hover:not(:disabled) { background: var(--accent-hover); }
-.btn.fantasma { border-color: transparent; background: transparent; color: var(--muted); }
+.btn.primario { background: var(--botao-degrade); border-color: transparent; color: #fff; }
+.btn.primario:hover:not(:disabled) { background: var(--botao-degrade); filter: brightness(1.08); }
+.btn.fantasma { border-color: transparent; background: transparent; color: var(--muted); box-shadow: none; }
 .btn.fantasma:hover:not(:disabled) { color: var(--text); background: var(--bg); }
-.btn.pequeno { padding: 5px 10px; font-size: 13px; }
+.btn.pequeno { padding: 6px 12px; font-size: 14px; min-height: 44px; }
 .link { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; font-weight: 500; color: var(--muted); }
 input, textarea, select { font: inherit; font-size: 14px; color: var(--text); background: var(--surface); border: 1px solid var(--border-forte); border-radius: 8px; padding: 9px 11px; width: 100%; }
@@ -92,12 +128,13 @@ input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 
 .marca { flex: none; width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center; border: 2px solid var(--border-forte); background: var(--surface); }
 .marca.concluido { background: var(--ok); border-color: var(--ok); color: #fff; }
 .marca.atual { border-color: var(--marca); box-shadow: inset 0 0 0 4px var(--surface), inset 0 0 0 11px var(--marca); }
-.marca.bloqueado { border-color: var(--border); background: var(--bg); color: #9aa1ad; }
+.marca.bloqueado { border-color: var(--border); background: var(--bg); color: var(--muted); }
 .marca.preparacao { border-style: dashed; }
 
-.selo { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 13px; font-weight: 600; white-space: nowrap; background: var(--bg); color: var(--muted); }
+/* selos com contorno suave, como os status da extranet (Confirmada / Cancelada) */
+.selo { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 13px; font-weight: 600; white-space: nowrap; background: var(--bg); color: var(--muted); border: 1px solid color-mix(in srgb, currentColor 28%, transparent); }
 .selo.concluido { background: var(--ok-bg); color: var(--ok); }
-.selo.atual { background: var(--accent-bg); color: var(--accent); }
+.selo.atual { background: var(--accent-bg); color: var(--accent-forte); }
 .selo.alerta { background: var(--warn-bg); color: var(--warn); }
 .selo.critico { background: var(--crit-bg); color: var(--crit); }
 .ok-texto { color: var(--ok); font-weight: 600; }
@@ -151,7 +188,7 @@ a.jornada-cartao:hover { border-color: var(--border-forte); }
 /* ---- cor de cada produto: faixa à esquerda do cartão e bolinha no rótulo ---- */
 .jornada-cartao.produto, .cartao-produto { border-left: 4px solid var(--cor); }
 .jornada-item.atual .jornada-cartao.produto { border-left-color: var(--cor); }
-.jornada-item.bloqueado .jornada-cartao.produto, .cartao-produto.bloqueado { border-left-color: color-mix(in srgb, var(--cor) 35%, white); }
+.jornada-item.bloqueado .jornada-cartao.produto, .cartao-produto.bloqueado { border-left-color: color-mix(in srgb, var(--cor) 35%, var(--surface)); }
 .produto-rotulo { display: inline-flex; align-items: center; gap: 8px; }
 .produto-rotulo::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: var(--cor); flex: none; }
 .cabecalho-produto h1 { display: flex; align-items: center; gap: 12px; }
@@ -184,7 +221,8 @@ a.jornada-cartao:hover { border-color: var(--border-forte); }
 .implantacao-destaque > .link { align-self: flex-start; }
 .implantacao-concluida { display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit; }
 .secao { margin-top: 36px; }
-.secao-titulo { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+/* rótulos de seção como "AÇÕES RÁPIDAS" da extranet */
+.secao-titulo { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); margin-bottom: 4px; }
 .secao > .muted { margin-bottom: 12px; }
 /* cards de treinamento ao vivo: faixa na cor do produto, dias da semana e horário de cada turma */
 .grade-treinos { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; }
@@ -194,11 +232,11 @@ a.jornada-cartao:hover { border-color: var(--border-forte); }
 .cartao-treino h3 { font-size: 18px; line-height: 1.3; letter-spacing: -0.01em; text-transform: none; color: var(--text); margin: 0; }
 .treino-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--muted); font-size: 14px; margin: 0; }
 .treino-meta span { display: inline-flex; align-items: center; gap: 5px; }
-.treino-rotulo { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 12px 0 0; }
+.treino-rotulo { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); margin: 12px 0 0; }
 .treino-sessoes { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .treino-sessoes li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; background: var(--bg); }
 .treino-dia { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
-.treino-hora { font-size: 14px; font-weight: 600; color: var(--accent); background: var(--accent-bg); padding: 3px 10px; border-radius: 6px; }
+.treino-hora { font-size: 14px; font-weight: 600; color: var(--accent-forte); background: var(--accent-bg); padding: 3px 10px; border-radius: 6px; }
 .cartao-treino .btn { margin-top: auto; align-self: flex-start; }
 .grade-tutoriais { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-top: 12px; }
 /* cards de tutoriais: a arte de cada produto (formato 2:3) ocupa o card inteiro */
@@ -207,7 +245,7 @@ a.jornada-cartao:hover { border-color: var(--border-forte); }
 .cartao-tutorial img { width: 100%; height: 100%; object-fit: cover; display: block; }
 /* a arte do hunit veio com margem e borda próprias: amplia um pouco para ficar igual às outras */
 .cartao-tutorial img[src$="hunit.png"] { transform: scale(1.06); }
-a.cartao-tutorial:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(16, 24, 40, .18); }
+a.cartao-tutorial:hover { transform: translateY(-3px); box-shadow: var(--sombra-alta); }
 /* hcorp sem arte: card escuro no mesmo formato, com o nome e "Em breve" embaixo, como nas artes */
 .cartao-tutorial.vazio { border: 1px solid #2a2e37; cursor: default; }
 .cartao-tutorial-texto { position: absolute; left: 18px; right: 18px; bottom: 22px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; color: #fff; }
@@ -272,7 +310,7 @@ a.passo-linha:hover { background: var(--bg); }
 .tabela th { text-align: left; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 12px 16px; border-bottom: 1px solid var(--border); white-space: nowrap; }
 .tabela td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
 .tabela tbody tr { cursor: pointer; }
-.tabela tbody tr:hover { background: #fafbfc; }
+.tabela tbody tr:hover { background: var(--linha-hover); }
 .tabela tbody tr:last-child td { border-bottom: 0; }
 .tabela a { color: inherit; text-decoration: none; }
 .tabela .num { text-align: right; }
@@ -337,7 +375,6 @@ a.passo-linha:hover { background: var(--bg); }
 :where(a, button, input, textarea, select, iframe, [tabindex]):focus-visible { outline: 2px solid #1976d2; outline-offset: 2px; }
 input:focus-visible, textarea:focus-visible { outline-offset: -1px; }
 /* áreas de toque de no mínimo 44px */
-.btn { min-height: 44px; }
 button.link { min-height: 44px; }
 .topo nav a { min-height: 44px; display: inline-flex; align-items: center; }
 /* sem animações para quem pediu menos movimento ao sistema */
@@ -350,13 +387,13 @@ button.link { min-height: 44px; }
 .sua-jornada { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border);
   border-radius: 14px; box-shadow: var(--sombra); color: var(--text); text-decoration: none; }
 a.sua-jornada:hover { border-color: var(--border-forte); }
-.sua-jornada-rotulo { font-size: 14px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.sua-jornada-rotulo { font-size: 14px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--accent); }
 .sua-jornada .barra { flex: 1 1 200px; height: 8px; }
 .sua-jornada .barra span { background: var(--accent); }
 .sua-jornada-fase { font-size: 15px; font-weight: 600; }
 .sua-jornada-resumo { font-size: 14px; color: var(--muted); }
 .sua-jornada .chevron, .cartao-jornada .chevron { color: var(--muted); flex: none; }
-.passo-a-passo-titulo { color: var(--accent); margin: 32px 0 16px; font-size: 14px; }
+.passo-a-passo-titulo { margin: 32px 0 16px; }
 
 .passo-a-passo { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 48px; }
 .etapa-jornada { position: relative; width: 64%; }
@@ -370,16 +407,16 @@ a.sua-jornada:hover { border-color: var(--border-forte); }
 
 .cartao-jornada { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px 18px; box-shadow: var(--sombra);
   color: var(--text); text-decoration: none; transition: border-color .15s, box-shadow .15s; }
-a.cartao-jornada:hover { border-color: var(--border-forte); box-shadow: 0 6px 18px rgba(16, 24, 40, .08); }
-.etapa-jornada.atual .cartao-jornada { border-color: var(--cor, var(--accent)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor, var(--accent)) 15%, white); }
-.etapa-jornada.bloqueado .cartao-jornada { background: #fafbfc; box-shadow: none; }
+a.cartao-jornada:hover { border-color: var(--border-forte); box-shadow: var(--sombra-alta); }
+.etapa-jornada.atual .cartao-jornada { border-color: var(--cor, var(--accent)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor, var(--accent)) 15%, var(--surface)); }
+.etapa-jornada.bloqueado .cartao-jornada { background: var(--surface-apagada); box-shadow: none; }
 .cartao-jornada-topo { display: flex; align-items: center; gap: 14px; }
 .cartao-jornada .marca, .icone-final { width: 46px; height: 46px; flex: none; }
 .cartao-jornada .marca svg { width: 20px; height: 20px; }
 .etapa-jornada.atual .marca { border-color: var(--cor); box-shadow: inset 0 0 0 7px var(--surface), inset 0 0 0 23px var(--cor); }
 .icone-final { border-radius: 50%; display: grid; place-items: center; font-size: 22px; background: var(--bg); border: 2px solid var(--border-forte); }
 .etapa-jornada.final.concluido .icone-final { background: var(--ok); border-color: var(--ok); }
-.cartao-jornada-tipo { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: color-mix(in srgb, var(--cor, var(--accent)) 75%, black); }
+.cartao-jornada-tipo { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: color-mix(in srgb, var(--cor, var(--accent)) var(--mistura-pct), var(--mistura-cor)); }
 .etapa-jornada.bloqueado .cartao-jornada-tipo { color: var(--muted); }
 .cartao-jornada h3 { margin: 2px 0 0; font-size: 20px; line-height: 1.25; letter-spacing: -0.01em; text-transform: none; color: var(--text); }
 .etapa-jornada.bloqueado .cartao-jornada h3 { color: var(--muted); }
@@ -394,9 +431,21 @@ a.cartao-jornada:hover { border-color: var(--border-forte); box-shadow: 0 6px 18
   .passo-a-passo { gap: 32px; }
   .etapa-jornada, .etapa-jornada:nth-child(even) { width: 100%; align-self: stretch; }
   .etapa-jornada:not(:first-child)::before, .etapa-jornada:nth-child(even)::before, .etapa-jornada:nth-child(odd):not(:first-child)::before {
-    left: 46px; width: 0; top: -32px; height: 32px; background: none; border-left: 2px dashed #cfd4dc; }
+    left: 46px; width: 0; top: -32px; height: 32px; background: none; border-left: 2px dashed var(--border-forte); }
   .cartao-jornada { padding: 18px; }
   .cartao-jornada h3 { font-size: 18px; }
 }
 /* verde mais vivo nos círculos de concluído do passo a passo, como na referência (3,3:1 com o ✓ branco) */
 .cartao-jornada .marca.concluido, .etapa-jornada.final.concluido .icone-final { background: #16a34a; border-color: #16a34a; }
+
+/* ---- modo claro/escuro ---- */
+.alternar-tema { display: inline-flex; align-items: center; gap: 2px; padding: 3px; min-height: 44px; border-radius: 99px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; }
+.alternar-tema span { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); }
+.alternar-tema span.ativo { background: var(--surface); box-shadow: 0 1px 3px rgba(20, 20, 30, .15); }
+.alternar-tema span.ativo:first-child { color: #d97706; }
+.alternar-tema span.ativo:last-child { color: var(--accent); }
+/* no escuro, o logo (texto preto) ganha um fundo claro até termos a versão branca do logo */
+html[data-tema="escuro"] .marca-sistema { background: #fff; border-radius: 10px; padding: 0 10px; overflow: hidden; }
+html[data-tema="escuro"] .login-marca img { background: #fff; border-radius: 12px; padding: 4px 12px; }
+html[data-tema="escuro"] .video.vazio, html[data-tema="escuro"] .em-preparo { background: var(--surface-apagada); }
+@media (max-width: 640px) { .quem { gap: 8px; } }

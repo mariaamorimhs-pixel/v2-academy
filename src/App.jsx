@@ -11,6 +11,7 @@ import Hotel from './pages/Hotel.jsx'
 import Editor from './pages/Editor.jsx'
 import Analistas from './pages/Analistas.jsx'
 import Inicio from './pages/Inicio.jsx'
+import { AlternarTema } from './tema.jsx'
 import { TutoriaisProduto, TutorialPasso } from './pages/Tutoriais.jsx'
 
 const SIMULACAO = 'implantacao-hibrida-simulando'
@@ -135,6 +136,7 @@ export default function App() {
           ))}
         </nav>
         <div className="quem">
+          <AlternarTema />
           <span>
             <b>{eu.nome}</b>
             <small>{hotel ? hotel.nome : usuario.perfil === 'analista' ? 'Analista' : 'Editora'}</small>
