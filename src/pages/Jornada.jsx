@@ -139,7 +139,7 @@ function CardReuniao({ seg, prog, jornada, analista, r }) {
     : null
   return (
     <CardJornada st={st} cor={CATALOGO[seg.produtos.at(-1)]?.cor} href={`#/reuniao/${seg.numero}`}
-      tipo="Reunião" titulo={nomeReuniao(seg, analista)}
+      tipo="Reunião" titulo={nomeReuniao(seg)}
       texto={`Agende e realize a reunião de revisão do ${listaMarcas(seg.produtos)} com sua analista antes de seguir para a próxima etapa.`}
       rodape={st === 'bloqueado' ? <span className="cartao-jornada-status">{status.texto}</span> : <span className={`selo ${status.classe}`}>{status.texto}</span>}
       acao={acao} />
