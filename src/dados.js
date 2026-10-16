@@ -4,7 +4,7 @@
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabase.js'
 
-let estado = { carregado: false, usuarios: [], hoteis: [], progresso: {}, conteudo: {} }
+let estado = { carregado: false, usuarios: [], hoteis: [], progresso: {}, conteudo: {}, inscricoes: {} }
 const ouvintes = new Set()
 const assinar = (f) => { ouvintes.add(f); return () => ouvintes.delete(f) }
 export const useEstado = () => useSyncExternalStore(assinar, () => estado)
@@ -24,10 +24,11 @@ export async function recarregar() {
     supabase.from('impl_passos_feitos').select('hotel_id, passo_id, por_nome, em'),
     supabase.from('impl_reunioes').select('hotel_id, numero, agendada_para, agendada_em, realizada_em, realizada_por'),
     supabase.from('impl_conteudo').select('passo_id, titulo, video, texto'),
+    supabase.from('impl_inscricoes').select('hotel_id, treino_id, por_nome, em'),
   ])
   const erro = respostas.find((r) => r.error)?.error
   if (erro) throw new Error(erro.message)
-  const [usuarios, hoteis, contratos, passos, reunioes, conteudo] = respostas.map((r) => r.data)
+  const [usuarios, hoteis, contratos, passos, reunioes, conteudo, inscricoes] = respostas.map((r) => r.data)
 
   const progresso = {}
   for (const h of hoteis) progresso[h.id] = { passos: {}, reunioes: {}, ultimaAtividade: h.ultima_atividade }
@@ -51,11 +52,12 @@ export async function recarregar() {
       .sort((a, b) => a.nome.localeCompare(b.nome)),
     progresso,
     conteudo: Object.fromEntries(conteudo.map((c) => [c.passo_id, semNulos({ titulo: c.titulo, video: c.video, texto: c.texto })])),
+    inscricoes: inscricoes.reduce((acc, i) => { (acc[i.hotel_id] ??= {})[i.treino_id] = { por: i.por_nome, em: i.em }; return acc }, {}),
   })
 }
 
 export function limparDados() {
-  publicar({ carregado: false, usuarios: [], hoteis: [], progresso: {}, conteudo: {} })
+  publicar({ carregado: false, usuarios: [], hoteis: [], progresso: {}, conteudo: {}, inscricoes: {} })
 }
 
 async function acao(nome, args) {
@@ -81,6 +83,9 @@ export const restaurarConteudo = (passoId) => acao('impl_restaurar_conteudo', { 
 
 export const salvarAnalista = (id, nome, email, calendly) =>
   acao('impl_salvar_analista', { p_id: id ?? null, p_nome: nome, p_email: email, p_calendly: calendly })
+
+// Inscrição feita pela janela do Calendly (o Calendly avisa a página quando a pessoa conclui).
+export const registrarInscricao = (hotelId, treinoId) => acao('impl_registrar_inscricao', { p_hotel: hotelId, p_treino: treinoId })
 
 export const zerarHotelTeste = (hotelId) => acao('impl_zerar_hotel_teste', { p_hotel: hotelId })
 

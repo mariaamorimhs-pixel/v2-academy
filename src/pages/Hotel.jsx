@@ -17,7 +17,7 @@ export default function Hotel({ estado, usuario, hotelId, onSimular }) {
   function confirmar(seg) {
     const r = progresso.reunioes?.[seg.numero] ?? {}
     const aviso = r.agendadaEm ? '' : '\n\nAtenção: o cliente ainda não agendou esta reunião pelo sistema.'
-    if (confirm(`Confirmar que a ${nomeReuniao(seg)} com ${hotel.nome} foi realizada? O próximo módulo será liberado para o hotel.${aviso}`)) {
+    if (confirm(`Confirmar que a ${nomeReuniao(seg).replace(/^R/, 'r')} com ${hotel.nome} foi realizada? O próximo módulo será liberado para o hotel.${aviso}`)) {
       tentar(() => marcarReuniaoRealizada(hotel.id, seg.numero))
     }
   }
@@ -48,7 +48,7 @@ export default function Hotel({ estado, usuario, hotelId, onSimular }) {
                 <section key={seg.id} className={`cartao bloco-reuniao ${st}`}>
                   <Marca status={st} />
                   <div className="bloco-reuniao-texto">
-                    <h2>{nomeReuniao(seg)} · {assuntoReuniao(seg, nomeProduto)}</h2>
+                    <h2>{nomeReuniao(seg)}</h2>
                     <p className="muted pequeno">
                       {st === 'concluido' ? `Realizada em ${fmtDataHora(r.realizadaEm)} · confirmada por ${r.realizadaPor}`
                         : st === 'bloqueado' ? 'Abre quando o cliente concluir a trilha deste bloco'

@@ -14,7 +14,7 @@ const etapa = (titulo, passos, extra = {}) => ({
 
 const DEFINICAO = {
   HBOOK: {
-    nome: 'hbook',
+    nome: 'HBook',
     marca: 'HBook',
     subtitulo: 'Motor de Reservas',
     resumo: 'Aprenda a utilizar o HBook no dia a dia do seu hotel. Ao final do treinamento, seu site vai gerar reservas diretas, sem comissões.',
@@ -32,7 +32,7 @@ const DEFINICAO = {
     ],
   },
   HUNIT: {
-    nome: 'hunit',
+    nome: 'HUnit',
     marca: 'HUnit',
     subtitulo: 'Gestor de Canais',
     resumo: 'Aprenda a utilizar o HUnit no dia a dia do seu hotel para distribuir tarifas e disponibilidade em todos os canais ao mesmo tempo, sem overbooking.',
@@ -49,7 +49,7 @@ const DEFINICAO = {
     ],
   },
   HCORP: {
-    nome: 'hcorp',
+    nome: 'HCorp',
     marca: 'HCorp',
     subtitulo: 'Gestão de Redes',
     resumo: 'Aprenda a utilizar o HCorp para acompanhar e gerenciar todas as unidades da sua rede em um só lugar.',
@@ -58,7 +58,7 @@ const DEFINICAO = {
     etapas: [],
   },
   HBOT: {
-    nome: 'hai',
+    nome: 'HAI',
     marca: 'HAI',
     subtitulo: 'Atendimento com IA',
     resumo: 'Aprenda a utilizar o HAI no dia a dia do seu hotel para atender e converter hóspedes a qualquer momento, sem sobrecarregar sua equipe.',
@@ -77,7 +77,7 @@ const DEFINICAO = {
     ],
   },
   HPRICE: {
-    nome: 'hprice',
+    nome: 'HPrice',
     marca: 'HPrice',
     subtitulo: 'Inteligência de Preços',
     resumo: 'Aprenda a utilizar o HPrice no dia a dia do seu hotel para definir preços com base no mercado e vender mais, com mais margem.',
@@ -116,9 +116,9 @@ export const nomeProduto = (codigo) => CATALOGO[codigo]?.nome ?? codigo
 // Treinamentos ao vivo em grupo: agendas de turma no Calendly da HSystem. O hai não tem turma.
 // Todas são webinars no Zoom de 1 hora; `sessoes` = dias da semana e horário de início de cada turma.
 export const TREINAMENTOS_GRUPO = [
-  { id: 'hbook', produtos: ['HBOOK'], titulo: 'hbook', descricao: 'Motor de reservas', sessoes: [{ dia: 'Terça', hora: '11h00' }, { dia: 'Quinta', hora: '15h00' }], cor: '#5d288e', url: 'https://calendly.com/treinamentoshsystem/treinamento-em-grupo-do-hbook' },
-  { id: 'hunit-hcorp', produtos: ['HUNIT', 'HCORP'], titulo: 'hunit e hcorp', descricao: 'Channel manager e gestão de redes', sessoes: [{ dia: 'Terça', hora: '15h00' }, { dia: 'Quinta', hora: '11h00' }], cor: '#798d2a', url: 'https://calendly.com/treinamentoshsystem/treinamento-em-grupo-do-hunit-e-hcorp' },
-  { id: 'hprice', produtos: ['HPRICE'], titulo: 'hprice', descricao: 'Inteligência de preços', sessoes: [{ dia: 'Quinta', hora: '14h00' }], cor: '#ed6c00', url: 'https://calendly.com/treinamentoshsystem/treinamento-em-grupo-do-hprice' },
+  { id: 'hbook', produtos: ['HBOOK'], titulo: 'HBook', descricao: 'Motor de reservas', sessoes: [{ dia: 'Terça', hora: '11h00' }, { dia: 'Quinta', hora: '15h00' }], cor: '#5d288e', url: 'https://calendly.com/treinamentoshsystem/treinamento-em-grupo-do-hbook' },
+  { id: 'hunit-hcorp', produtos: ['HUNIT', 'HCORP'], titulo: 'HUnit e HCorp', descricao: 'Channel manager e gestão de redes', sessoes: [{ dia: 'Terça', hora: '15h00' }, { dia: 'Quinta', hora: '11h00' }], cor: '#798d2a', url: 'https://calendly.com/treinamentoshsystem/treinamento-em-grupo-do-hunit-e-hcorp' },
+  { id: 'hprice', produtos: ['HPRICE'], titulo: 'HPrice', descricao: 'Inteligência de preços', sessoes: [{ dia: 'Quinta', hora: '14h00' }], cor: '#ed6c00', url: 'https://calendly.com/treinamentoshsystem/treinamento-em-grupo-do-hprice' },
 ]
 
 // Ordem dos cartões de tutoriais (todos os produtos, sem trava).

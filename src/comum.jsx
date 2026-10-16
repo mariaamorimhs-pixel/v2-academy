@@ -27,7 +27,7 @@ export function dadosDoHotel(estado, hotelId) {
   const jornada = montarJornada(hotel.contratos, estado.conteudo)
   const prog = calcularProgresso(jornada, progresso)
   const analista = estado.usuarios.find((u) => u.id === hotel.analistaId)
-  return { hotel, progresso, jornada, prog, analista }
+  return { hotel, progresso, jornada, prog, analista, inscricoes: estado.inscricoes?.[hotelId] ?? {} }
 }
 
 // Aceita youtu.be/ID, youtube.com/watch?v=ID, /embed/ID, /shorts/ID ou o próprio ID.
@@ -81,7 +81,7 @@ export function ProgressoImplantacao({ prog }) {
   return (
     <div className="progresso-implantacao">
       <Barra pct={prog.pct} rotulo="Progresso da implantação" />
-      <span className="muted pequeno">{prog.feitas} de {prog.total} passos concluídos</span>
+      <span className="muted pequeno">{prog.feitas} de {prog.total} passos da implantação concluídos</span>
     </div>
   )
 }
@@ -90,7 +90,7 @@ export function ProgressoImplantacao({ prog }) {
 export function textoDesbloqueio(jornada, seg) {
   const anterior = jornada[jornada.indexOf(seg) - 1]
   if (!anterior) return 'Bloqueado'
-  return anterior.tipo === 'reuniao' ? `Libera após a ${nomeReuniao(anterior)}` : `Libera ao concluir ${CATALOGO[anterior.codigo]?.marca ?? anterior.nome}`
+  return anterior.tipo === 'reuniao' ? `Libera após a ${nomeReuniao(anterior).replace(/^R/, 'r')}` : `Libera ao concluir ${CATALOGO[anterior.codigo]?.marca ?? anterior.nome}`
 }
 
 export function Barra({ pct, fina, rotulo }) {
@@ -123,7 +123,13 @@ export function Marca({ status }) {
 const ROTULOS = { concluido: 'Concluído', atual: 'Em andamento', bloqueado: 'Bloqueado', preparacao: 'Em preparação', embreve: 'Em breve' }
 export const Selo = ({ status, children }) => <span className={`selo ${status}`}>{children ?? ROTULOS[status]}</span>
 
-export const nomeReuniao = (seg) => `Reunião ${seg.numero}`
+// Nome único da reunião em todas as telas: "Reunião de revisão do HBook" (+ " com Ana Lima" quando houver analista).
+export const marcaProduto = (codigo) => CATALOGO[codigo]?.marca ?? codigo
+export const listaMarcas = (codigos) => {
+  const m = codigos.map(marcaProduto)
+  return m.length > 1 ? `${m.slice(0, -1).join(", ")} e ${m.at(-1)}` : m[0] ?? ""
+}
+export const nomeReuniao = (seg, analista) => `Reunião de revisão do ${listaMarcas(seg.produtos)}${analista?.nome ? ` com ${analista.nome}` : ""}`
 export const assuntoReuniao = (seg, nome) => seg.produtos.map(nome).join(', ')
 
 // Agenda da turma do Calendly por cima da tela, sem sair do sistema.
@@ -131,13 +137,15 @@ export const assuntoReuniao = (seg, nome) => seg.produtos.map(nome).join(', ')
 // (Fechar, Esc ou clique fora), o foco volta ao botão que abriu.
 const LIMITE_CARREGAMENTO_MS = 10000
 
-export function JanelaCalendly({ treino, onFechar }) {
+export function JanelaCalendly({ treino, onFechar, onAgendado }) {
   const [estadoAgenda, setEstadoAgenda] = useState('carregando') // carregando | pronta | erro
   const fechar = useRef(null)
   const agenda = useRef(null)
   const quemAbriu = useRef(document.activeElement)
   const aoFechar = useRef(onFechar)
   aoFechar.current = onFechar
+  const aoAgendar = useRef(onAgendado)
+  aoAgendar.current = onAgendado
 
   useEffect(() => {
     const origem = quemAbriu.current
@@ -157,7 +165,9 @@ export function JanelaCalendly({ treino, onFechar }) {
   const paginaAbriu = useRef(false)
   useEffect(() => {
     const aoReceber = (e) => {
-      if (e.origin === 'https://calendly.com' && e.data?.event === 'calendly.event_type_viewed') setEstadoAgenda('pronta')
+      if (e.origin !== 'https://calendly.com') return
+      if (e.data?.event === 'calendly.event_type_viewed') setEstadoAgenda('pronta')
+      if (e.data?.event === 'calendly.event_scheduled') aoAgendar.current?.()
     }
     window.addEventListener('message', aoReceber)
     const t = setTimeout(() => setEstadoAgenda((s) => (s !== 'carregando' ? s : paginaAbriu.current ? 'pronta' : 'erro')), LIMITE_CARREGAMENTO_MS)

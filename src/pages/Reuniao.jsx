@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { dadosDoHotel, fmtDataHora, nomeReuniao, assuntoReuniao, tentar } from '../comum.jsx'
+import { dadosDoHotel, fmtDataHora, nomeReuniao, listaMarcas, tentar } from '../comum.jsx'
 import { nomeProduto } from '../trilhas.js'
 import { agendarReuniao } from '../dados.js'
 import { Voltar } from './Produto.jsx'
@@ -24,7 +24,7 @@ export default function Reuniao({ estado, hotelId, numero }) {
 
   if (!seg) return <Voltar texto="Reunião não encontrada." />
   const st = prog.status[seg.id]
-  if (st === 'bloqueado') return <Voltar texto={`A ${nomeReuniao(seg)} abre quando você concluir a trilha de ${assuntoReuniao(seg, nomeProduto)}.`} />
+  if (st === 'bloqueado') return <Voltar texto={`A ${nomeReuniao(seg).replace(/^R/, 'r')} abre quando você concluir a trilha do ${listaMarcas(seg.produtos)}.`} />
   const r = progresso.reunioes?.[numero] ?? {}
 
   return (
@@ -32,8 +32,8 @@ export default function Reuniao({ estado, hotelId, numero }) {
       <a href="#/implantacao" className="voltar">← Minha implantação</a>
       <header className="cabecalho">
         <div>
-          <h1>{nomeReuniao(seg)} com {analista?.nome ?? 'seu analista'}</h1>
-          <p className="muted">Vamos revisar juntos o que você configurou em {assuntoReuniao(seg, nomeProduto)} e tirar suas dúvidas.</p>
+          <h1>{nomeReuniao(seg, analista)}</h1>
+          <p className="muted">Vamos revisar juntos o que você configurou no {listaMarcas(seg.produtos)} e tirar suas dúvidas.</p>
         </div>
       </header>
 

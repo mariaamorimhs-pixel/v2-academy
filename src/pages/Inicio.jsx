@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { dadosDoHotel, nomeReuniao, JanelaCalendly, saudacao, ProgressoImplantacao, Selo } from '../comum.jsx'
+import { dadosDoHotel, nomeReuniao, JanelaCalendly, saudacao, ProgressoImplantacao, Selo, fmtData, fmtDataHora, tentar } from '../comum.jsx'
+import { registrarInscricao } from '../dados.js'
 import { CATALOGO, TREINAMENTOS_GRUPO, ORDEM_TUTORIAIS, IMAGEM_TUTORIAL, corProduto, nomeProduto } from '../trilhas.js'
 
 const IconeVideo = () => (
@@ -8,6 +9,36 @@ const IconeVideo = () => (
 const IconeRelogio = () => (
   <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" strokeWidth="1.4" /><path d="M8 4.6V8l2.4 1.6" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>
 )
+
+const DIAS = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado']
+const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+// Próxima data da turma: o próximo dia da semana dela que ainda não passou do horário de início.
+function proximaData(sessao) {
+  const alvo = DIAS.indexOf(sessao.dia.toLowerCase())
+  const hora = parseInt(sessao.hora, 10)
+  const agora = new Date()
+  const d = new Date(agora)
+  d.setHours(hora, 0, 0, 0)
+  let soma = (alvo - agora.getDay() + 7) % 7
+  if (soma === 0 && d <= agora) soma = 7
+  d.setDate(d.getDate() + soma)
+  return `${DIAS[d.getDay()].slice(0, 3)}, ${d.getDate()}/${MESES[d.getMonth()]}`
+}
+
+// Inscrição feita pela janela do Calendly nos últimos 7 dias: mostra "Inscrito ✓".
+const DIAS_INSCRICAO_VALE = 7
+function BotaoInscricao({ treino, inscricao, onAbrir }) {
+  const recente = inscricao && Date.now() - new Date(inscricao.em).getTime() < DIAS_INSCRICAO_VALE * 864e5
+  if (!recente) {
+    return <button className="btn primario" onClick={onAbrir} aria-label={`Fazer inscrição no treinamento em grupo do ${treino.titulo}`}>Fazer inscrição</button>
+  }
+  return (
+    <div className="treino-inscrito">
+      <span className="selo concluido">Inscrito ✓ em {fmtData(inscricao.em)}</span>
+      <button className="btn" onClick={onAbrir} aria-label={`Ver horários do treinamento em grupo do ${treino.titulo}`}>Ver horários</button>
+    </div>
+  )
+}
 
 // Produtos ligados ao item atual da implantação (o produto do passo, ou os produtos da reunião).
 function produtosDoMomento(prog) {
@@ -44,18 +75,16 @@ export default function Inicio({ estado, usuario, hotelId }) {
                 <span aria-hidden="true">·</span>
                 <span><IconeRelogio /> 1 hora</span>
               </p>
-              <p className="treino-rotulo">Acontece</p>
               <ul className="treino-sessoes">
                 {t.sessoes.map((s) => (
                   <li key={s.dia}>
-                    <span className="treino-dia">{s.dia}</span>
-                    <span className="treino-hora">{s.hora}</span>
+                    <span className="treino-dia">Toda {s.dia.toLowerCase()}</span>
+                    <span className="treino-proxima">próxima: {proximaData(s)}</span>
+                    <span className="treino-hora">{s.hora.replace("h00", "h")}</span>
                   </li>
                 ))}
               </ul>
-              <button className="btn primario" onClick={() => setCalendly(t)} aria-label={`Fazer inscrição no treinamento em grupo do ${t.titulo}`}>
-                Fazer inscrição
-              </button>
+              <BotaoInscricao treino={t} inscricao={d.inscricoes?.[t.id]} onAbrir={() => setCalendly(t)} />
             </li>
           ))}
         </ul>
@@ -86,7 +115,7 @@ export default function Inicio({ estado, usuario, hotelId }) {
         </div>
       </section>
 
-      {calendly && <JanelaCalendly treino={calendly} onFechar={() => setCalendly(null)} />}
+      {calendly && <JanelaCalendly treino={calendly} onFechar={() => setCalendly(null)} onAgendado={() => tentar(() => registrarInscricao(hotelId, calendly.id))} />}
     </>
   )
 }
@@ -105,18 +134,23 @@ function CartaoImplantacao({ d }) {
   }
   const seg = a.tipo === 'passo' ? jornada.find((s) => s.id === a.produto) : null
   const destino = a.tipo === 'passo' ? `#/passo/${a.id}` : `#/reuniao/${a.numero}`
+  const r = a.tipo === 'reuniao' ? d.progresso.reunioes?.[a.numero] ?? {} : null
+  // O botão diz exatamente o que acontece ao clicar.
+  const rotuloBotao = !r ? 'Continuar' : r.agendadaEm ? 'Ver agendamento' : 'Agendar reunião'
+  const detalhe = !r ? `${seg.nome} · ${a.etapa.titulo}`
+    : r.agendadaEm ? (r.agendadaPara ? `Agendada para ${fmtDataHora(r.agendadaPara)} · aguardando a confirmação da analista` : 'Agendada · aguardando a confirmação da analista')
+    : 'Escolha um horário na agenda da sua analista'
   return (
     <section className="cartao implantacao-destaque">
       <div className="implantacao-topo">
-        <span className="sobre">Minha implantação</span>
-        <span className="numero-medio">{prog.pct}%</span>
+        <span className="implantacao-titulo">Próximo passo</span>
+        <span className="implantacao-pct">Implantação: <b>{prog.pct}%</b></span>
       </div>
-      <p className="muted pequeno">Próximo passo</p>
-      <h2 className="proximo-passo">{a.tipo === 'passo' ? a.passo.titulo : `${nomeReuniao(a.reuniao)} com ${analista?.nome ?? 'seu analista'}`}</h2>
-      <p className="muted">{a.tipo === 'passo' ? `${seg.nome} · ${a.etapa.titulo}` : 'Agende pelo calendário do seu analista'}</p>
+      <h2 className="proximo-passo">{a.tipo === 'passo' ? a.passo.titulo : nomeReuniao(a.reuniao, analista)}</h2>
+      <p className="muted">{detalhe}</p>
       <div className="implantacao-rodape">
         <ProgressoImplantacao prog={prog} />
-        <a className="btn primario" href={destino}>Continuar →</a>
+        <a className="btn primario" href={destino}>{rotuloBotao} →</a>
       </div>
       <a className="link pequeno" href="#/implantacao">Ver a trilha completa</a>
     </section>
