@@ -1,4 +1,4 @@
-import { dadosDoHotel, Barra, Marca, Selo, fmtDataHora, nomeReuniao, assuntoReuniao } from '../comum.jsx'
+import { dadosDoHotel, Barra, Marca, Selo, fmtDataHora, nomeReuniao, assuntoReuniao, saudacao, ProgressoImplantacao, textoDesbloqueio } from '../comum.jsx'
 import { nomeProduto } from '../trilhas.js'
 
 // Tela inicial do cliente: os produtos do hotel na ordem, cada reunião entre os blocos, e onde ele está agora.
@@ -17,7 +17,7 @@ export default function Jornada({ estado, usuario, hotelId }) {
       <section className="cartao destaque">
         <div className="destaque-texto">
           <p className="sobre">{hotel.nome}</p>
-          <h1>Olá, {primeiroNome}</h1>
+          <h1>{saudacao()}, <span className="destaque-nome">{primeiroNome}</span>.</h1>
           <p className="muted">
             {prog.atual
               ? <>Próximo passo: <b>{prog.atual.tipo === 'passo' ? prog.atual.passo.titulo : `${nomeReuniao(prog.atual.reuniao)} com ${analista?.nome ?? 'seu analista'}`}</b></>
@@ -26,9 +26,8 @@ export default function Jornada({ estado, usuario, hotelId }) {
         </div>
         <div className="destaque-progresso">
           <div className="numero-grande">{prog.pct}%</div>
-          <Barra pct={prog.pct} />
-          <p className="muted pequeno">{prog.feitas} de {prog.total} passos e reuniões concluídos</p>
-          {destinoAtual && <a className="btn primario" href={destinoAtual}>Continuar</a>}
+          <ProgressoImplantacao prog={prog} />
+          {destinoAtual && <a className="btn primario" href={destinoAtual}>Continuar →</a>}
         </div>
       </section>
 
@@ -50,7 +49,7 @@ export default function Jornada({ estado, usuario, hotelId }) {
                       <h2>{seg.nome}</h2>
                       <p className="muted pequeno">{seg.descricao}</p>
                     </div>
-                    <Selo status={st} />
+                    <Selo status={st}>{st === 'bloqueado' ? textoDesbloqueio(jornada, seg) : undefined}</Selo>
                   </div>
                   {ids.length > 0 && st !== 'bloqueado' && (
                     <div className="jornada-progresso">
@@ -77,7 +76,7 @@ export default function Jornada({ estado, usuario, hotelId }) {
                   </div>
                   <Selo status={st}>
                     {st === 'concluido' ? 'Realizada'
-                      : st === 'bloqueado' ? 'Bloqueada'
+                      : st === 'bloqueado' ? textoDesbloqueio(jornada, seg)
                       : r.agendadaEm ? 'Agendada' : 'Agende agora'}
                   </Selo>
                 </div>

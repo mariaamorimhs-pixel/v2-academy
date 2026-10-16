@@ -27,6 +27,15 @@ const MENU = {
   editora: [{ rota: '', rotulo: 'Conteúdo' }, { rota: 'hoteis', rotulo: 'Hotéis' }, { rota: 'analistas', rotulo: 'Analistas' }],
 }
 
+// Título da aba por tela: "Início · HSystem Academy", "Minha implantação · HSystem Academy"…
+function tituloDaAba(perfil, pagina) {
+  const nome = perfil === 'cliente'
+    ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'Minha implantação' : ['tutoriais', 'tutorial'].includes(pagina) ? 'Tutoriais' : 'Início')
+    : pagina === 'hoteis' || pagina === 'hotel' || (perfil === 'analista' && !pagina) ? (perfil === 'analista' ? 'Meus hotéis' : 'Hotéis')
+    : pagina === 'analistas' ? 'Analistas' : 'Conteúdo'
+  return `${nome} · HSystem Academy`
+}
+
 export default function App() {
   const estado = useEstado()
   const [sessao, setSessao] = useState(undefined)
@@ -80,6 +89,7 @@ export default function App() {
   const usuario = hotelSimulado ? { ...eu, perfil: 'cliente', hotelId: hotelSimulado.id } : eu
 
   const [pagina, param] = rota
+  document.title = tituloDaAba(usuario.perfil, pagina)
   let conteudo
   if (usuario.perfil === 'cliente') {
     const props = { estado, usuario, hotelId: usuario.hotelId }
@@ -121,7 +131,7 @@ export default function App() {
         </a>
         <nav>
           {MENU[usuario.perfil].map((m) => (
-            <a key={m.rota} href={`#/${m.rota}`} className={ativa === m.rota ? 'ativa' : ''}>{m.rotulo}</a>
+            <a key={m.rota} href={`#/${m.rota}`} className={ativa === m.rota ? 'ativa' : ''} aria-current={ativa === m.rota ? 'page' : undefined}>{m.rotulo}</a>
           ))}
         </nav>
         <div className="quem">

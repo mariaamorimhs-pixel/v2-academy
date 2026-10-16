@@ -1,4 +1,5 @@
 // Peças usadas em várias telas: datas, vídeo do YouTube, texto, barra de progresso e ícones de status.
+import { useEffect, useRef, useState } from 'react'
 import { montarJornada, calcularProgresso } from './regras.js'
 
 // Executa uma ação no banco e avisa se der erro (sem rede, sem permissão…). Devolve true se deu certo.
@@ -39,7 +40,7 @@ export function youtubeId(url) {
 
 export function Video({ url, titulo }) {
   const id = youtubeId(url)
-  if (!id) return <div className="video vazio"><span>Vídeo em produção</span></div>
+  if (!id) return null
   return (
     <div className="video">
       <iframe
@@ -54,7 +55,7 @@ export function Video({ url, titulo }) {
 
 // Texto simples: linha em branco separa parágrafos; linhas começando com "- " viram lista.
 export function Texto({ texto }) {
-  if (!texto?.trim()) return <p className="muted">Texto em produção.</p>
+  if (!texto?.trim()) return null
   return (
     <div className="texto">
       {texto.trim().split(/\n\s*\n/).map((bloco, i) => {
@@ -68,9 +69,32 @@ export function Texto({ texto }) {
   )
 }
 
-export function Barra({ pct, fina }) {
+export const saudacao = () => {
+  const h = new Date().getHours()
+  return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'
+}
+
+// Progresso geral da implantação: o mesmo componente na Início e em Minha implantação,
+// sempre no azul da marca (as cores dos produtos ficam só nas faixas e barras de cada produto).
+export function ProgressoImplantacao({ prog }) {
   return (
-    <div className={`barra ${fina ? 'fina' : ''}`} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+    <div className="progresso-implantacao">
+      <Barra pct={prog.pct} rotulo="Progresso da implantação" />
+      <span className="muted pequeno">{prog.feitas} de {prog.total} passos concluídos</span>
+    </div>
+  )
+}
+
+// Texto de um item bloqueado da jornada: o que precisa acontecer antes dele.
+export function textoDesbloqueio(jornada, seg) {
+  const anterior = jornada[jornada.indexOf(seg) - 1]
+  if (!anterior) return 'Bloqueado'
+  return anterior.tipo === 'reuniao' ? `Libera após a ${nomeReuniao(anterior)}` : `Libera ao concluir ${anterior.nome}`
+}
+
+export function Barra({ pct, fina, rotulo }) {
+  return (
+    <div className={`barra ${fina ? 'fina' : ''}`} role="progressbar" aria-label={rotulo} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
       <span style={{ width: `${pct}%` }} />
     </div>
   )
@@ -92,11 +116,90 @@ export function Marca({ status }) {
       </span>
     )
   }
-  return <span className={`marca ${status}`} aria-label={status === 'atual' ? 'Liberado' : 'Em preparação'} />
+  return <span className={`marca ${status}`} aria-label={status === 'atual' ? 'Liberado' : status === 'embreve' ? 'Em breve' : 'Em preparação'} />
 }
 
-const ROTULOS = { concluido: 'Concluído', atual: 'Em andamento', bloqueado: 'Bloqueado', preparacao: 'Em preparação' }
+const ROTULOS = { concluido: 'Concluído', atual: 'Em andamento', bloqueado: 'Bloqueado', preparacao: 'Em preparação', embreve: 'Em breve' }
 export const Selo = ({ status, children }) => <span className={`selo ${status}`}>{children ?? ROTULOS[status]}</span>
 
 export const nomeReuniao = (seg) => `Reunião ${seg.numero}`
 export const assuntoReuniao = (seg, nome) => seg.produtos.map(nome).join(', ')
+
+// Agenda da turma do Calendly por cima da tela, sem sair do sistema.
+// Acessível: o foco vai para "Fechar" ao abrir, o Tab fica preso dentro da janela e, ao fechar
+// (Fechar, Esc ou clique fora), o foco volta ao botão que abriu.
+const LIMITE_CARREGAMENTO_MS = 10000
+
+export function JanelaCalendly({ treino, onFechar }) {
+  const [estadoAgenda, setEstadoAgenda] = useState('carregando') // carregando | pronta | erro
+  const fechar = useRef(null)
+  const agenda = useRef(null)
+  const quemAbriu = useRef(document.activeElement)
+  const aoFechar = useRef(onFechar)
+  aoFechar.current = onFechar
+
+  useEffect(() => {
+    const origem = quemAbriu.current
+    fechar.current?.focus()
+    const aoTeclar = (e) => { if (e.key === 'Escape') aoFechar.current() }
+    window.addEventListener('keydown', aoTeclar)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', aoTeclar)
+      document.body.style.overflow = ''
+      origem?.focus?.()
+    }
+  }, [])
+
+  // A agenda está pronta quando o Calendly avisa que mostrou os horários ou 1,5 s depois que a página
+  // dele abriu (nem todo navegador repassa o aviso). Se em 10 s nem a página abriu, mostra o erro.
+  const paginaAbriu = useRef(false)
+  useEffect(() => {
+    const aoReceber = (e) => {
+      if (e.origin === 'https://calendly.com' && e.data?.event === 'calendly.event_type_viewed') setEstadoAgenda('pronta')
+    }
+    window.addEventListener('message', aoReceber)
+    const t = setTimeout(() => setEstadoAgenda((s) => (s !== 'carregando' ? s : paginaAbriu.current ? 'pronta' : 'erro')), LIMITE_CARREGAMENTO_MS)
+    return () => { window.removeEventListener('message', aoReceber); clearTimeout(t) }
+  }, [])
+
+  const parametros = new URLSearchParams({
+    embed_type: 'Inline', embed_domain: window.location.hostname,
+    hide_gdpr_banner: '1', primary_color: '1976d2', hide_event_type_details: '1',
+  })
+  const url = `${treino.url}?${parametros}`
+
+  // Sentinelas nas pontas da janela mantêm o Tab circulando entre "Fechar" e a agenda.
+  const irParaFechar = () => fechar.current?.focus()
+  const irParaAgenda = () => (agenda.current ?? fechar.current)?.focus()
+
+  return (
+    <div className="janela-fundo" onClick={() => aoFechar.current()}>
+      <div className="janela" role="dialog" aria-modal="true" aria-label={`Treinamento em grupo de ${treino.titulo}`} onClick={(e) => e.stopPropagation()}>
+        <span tabIndex={0} onFocus={irParaAgenda} aria-hidden="true" />
+        <header>
+          <b>Treinamento em grupo · {treino.titulo}</b>
+          <button ref={fechar} className="btn fantasma pequeno" onClick={() => aoFechar.current()}>Fechar ✕</button>
+        </header>
+        <div className="janela-corpo">
+          {estadoAgenda === 'erro' ? (
+            <div className="janela-aviso">
+              <p>Não foi possível carregar a agenda.</p>
+              <a className="btn" href={treino.url} target="_blank" rel="noopener noreferrer">Abrir agenda em nova aba</a>
+            </div>
+          ) : (
+            <>
+              {estadoAgenda === 'carregando' && <div className="janela-aviso" role="status">Carregando horários…</div>}
+              <iframe ref={agenda} src={url} title={`Agenda do treinamento de ${treino.titulo}`}
+                className={estadoAgenda === 'pronta' ? '' : 'invisivel'} onLoad={() => {
+                  paginaAbriu.current = true
+                  setTimeout(() => setEstadoAgenda((s) => (s === 'carregando' ? 'pronta' : s)), 1500)
+                }} />
+            </>
+          )}
+        </div>
+        <span tabIndex={0} onFocus={irParaFechar} aria-hidden="true" />
+      </div>
+    </div>
+  )
+}
