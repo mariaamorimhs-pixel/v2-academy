@@ -99,10 +99,11 @@ export const CATALOGO = Object.fromEntries(
 
 export const nomeProduto = (codigo) => CATALOGO[codigo]?.nome ?? codigo
 // Treinamentos ao vivo em grupo: agendas de turma no Calendly da HSystem. O hai não tem turma.
+// Todas são webinars no Zoom de 1 hora; `sessoes` = dias da semana e horário de início de cada turma.
 export const TREINAMENTOS_GRUPO = [
-  { id: 'hbook', produtos: ['HBOOK'], titulo: 'hbook', descricao: 'Motor de reservas', cor: '#5d288e', url: 'https://calendly.com/treinamentoshsystem/treinamento-em-grupo-do-hbook' },
-  { id: 'hunit-hcorp', produtos: ['HUNIT', 'HCORP'], titulo: 'hunit e hcorp', descricao: 'Channel manager e gestão de redes', cor: '#798d2a', url: 'https://calendly.com/treinamentoshsystem/treinamento-em-grupo-do-hunit-e-hcorp' },
-  { id: 'hprice', produtos: ['HPRICE'], titulo: 'hprice', descricao: 'Inteligência de preços', cor: '#ed6c00', url: 'https://calendly.com/treinamentoshsystem/treinamento-em-grupo-do-hprice' },
+  { id: 'hbook', produtos: ['HBOOK'], titulo: 'hbook', descricao: 'Motor de reservas', sessoes: [{ dia: 'Terça', hora: '11h00' }, { dia: 'Quinta', hora: '15h00' }], cor: '#5d288e', url: 'https://calendly.com/treinamentoshsystem/treinamento-em-grupo-do-hbook' },
+  { id: 'hunit-hcorp', produtos: ['HUNIT', 'HCORP'], titulo: 'hunit e hcorp', descricao: 'Channel manager e gestão de redes', sessoes: [{ dia: 'Terça', hora: '15h00' }, { dia: 'Quinta', hora: '11h00' }], cor: '#798d2a', url: 'https://calendly.com/treinamentoshsystem/treinamento-em-grupo-do-hunit-e-hcorp' },
+  { id: 'hprice', produtos: ['HPRICE'], titulo: 'hprice', descricao: 'Inteligência de preços', sessoes: [{ dia: 'Quinta', hora: '14h00' }], cor: '#ed6c00', url: 'https://calendly.com/treinamentoshsystem/treinamento-em-grupo-do-hprice' },
 ]
 
 // Ordem dos cartões de tutoriais (todos os produtos, sem trava).

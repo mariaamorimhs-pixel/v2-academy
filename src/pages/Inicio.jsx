@@ -2,6 +2,13 @@ import { useState } from 'react'
 import { dadosDoHotel, nomeReuniao, JanelaCalendly, saudacao, ProgressoImplantacao, Selo } from '../comum.jsx'
 import { CATALOGO, TREINAMENTOS_GRUPO, ORDEM_TUTORIAIS, corProduto, nomeProduto } from '../trilhas.js'
 
+const IconeVideo = () => (
+  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><rect x="1.5" y="4" width="9" height="8" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.4" /><path d="M10.5 7l4-2.2v6.4l-4-2.2z" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg>
+)
+const IconeRelogio = () => (
+  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" strokeWidth="1.4" /><path d="M8 4.6V8l2.4 1.6" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>
+)
+
 // Produtos ligados ao item atual da implantação (o produto do passo, ou os produtos da reunião).
 function produtosDoMomento(prog) {
   const a = prog.atual
@@ -27,15 +34,28 @@ export default function Inicio({ estado, usuario, hotelId }) {
       <section className="secao">
         <h2 className="secao-titulo">Treinamentos ao vivo em grupo</h2>
         <p className="muted pequeno">Turmas com especialistas da HSystem. Escolha o melhor horário e se inscreva.</p>
-        <ul className="cartao lista-treinos">
+        <ul className="grade-treinos">
           {TREINAMENTOS_GRUPO.map((t) => (
-            <li key={t.id}>
-              <span className="produto-rotulo" style={{ '--cor': t.cor }}><b>{t.titulo}</b></span>
-              <span className="muted pequeno">
-                {t.descricao}
-                {t.produtos.some((p) => doMomento.includes(p)) && <> <Selo status="atual">Do seu próximo passo</Selo></>}
-              </span>
-              <button className="btn" onClick={() => setCalendly(t)}>Ver horários</button>
+            <li key={t.id} className="cartao-treino" style={{ '--cor': t.cor }}>
+              {t.produtos.some((p) => doMomento.includes(p)) && <Selo status="atual">Do seu próximo passo</Selo>}
+              <h3>Treinamento em grupo do {t.titulo}</h3>
+              <p className="treino-meta">
+                <span><IconeVideo /> Webinar no Zoom</span>
+                <span aria-hidden="true">·</span>
+                <span><IconeRelogio /> 1 hora</span>
+              </p>
+              <p className="treino-rotulo">Acontece</p>
+              <ul className="treino-sessoes">
+                {t.sessoes.map((s) => (
+                  <li key={s.dia}>
+                    <span className="treino-dia">{s.dia}</span>
+                    <span className="treino-hora">{s.hora}</span>
+                  </li>
+                ))}
+              </ul>
+              <button className="btn primario" onClick={() => setCalendly(t)} aria-label={`Fazer inscrição no treinamento em grupo do ${t.titulo}`}>
+                Fazer inscrição
+              </button>
             </li>
           ))}
         </ul>

@@ -187,9 +187,20 @@ a.jornada-cartao:hover { border-color: var(--border-forte); }
 .secao { margin-top: 36px; }
 .secao-titulo { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
 .secao > .muted { margin-bottom: 12px; }
-.lista-treinos { list-style: none; margin: 0; padding: 4px 20px; }
-.lista-treinos li { display: grid; grid-template-columns: 160px 1fr auto; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
-.lista-treinos li:last-child { border-bottom: 0; }
+/* cards de treinamento ao vivo: faixa na cor do produto, dias da semana e horário de cada turma */
+.grade-treinos { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; }
+.cartao-treino { background: var(--surface); border: 1px solid var(--border); border-left: 5px solid var(--cor); border-radius: var(--radius); box-shadow: var(--sombra);
+  padding: 20px 22px; display: flex; flex-direction: column; gap: 6px; }
+.cartao-treino > .selo { align-self: flex-start; margin-bottom: 4px; }
+.cartao-treino h3 { font-size: 18px; line-height: 1.3; letter-spacing: -0.01em; text-transform: none; color: var(--text); margin: 0; }
+.treino-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--muted); font-size: 14px; margin: 0; }
+.treino-meta span { display: inline-flex; align-items: center; gap: 5px; }
+.treino-rotulo { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 12px 0 0; }
+.treino-sessoes { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.treino-sessoes li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; background: var(--bg); }
+.treino-dia { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+.treino-hora { font-size: 14px; font-weight: 600; color: var(--accent); background: var(--accent-bg); padding: 3px 10px; border-radius: 6px; }
+.cartao-treino .btn { margin-top: auto; align-self: flex-start; }
 .grade-tutoriais { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-top: 12px; }
 .cartao-tutorial { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 18px; border-radius: var(--radius);
   background: color-mix(in srgb, var(--cor) 8%, white); border: 1px solid color-mix(in srgb, var(--cor) 25%, white); color: var(--text); text-decoration: none; transition: border-color .15s, transform .15s; }
@@ -210,8 +221,6 @@ a.cartao-tutorial:hover { border-color: var(--cor); transform: translateY(-2px);
   .inicio-cabeca h1 { font-size: 24px; }
   .implantacao-destaque { padding: 20px; }
   .proximo-passo { font-size: 20px; }
-  .lista-treinos li { grid-template-columns: 1fr; gap: 4px; }
-  .lista-treinos li .btn { justify-self: start; margin-top: 6px; }
   .grade-tutoriais { grid-template-columns: 1fr 1fr; }
 
   .janela-fundo { padding: 0; }
