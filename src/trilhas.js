@@ -109,5 +109,13 @@ export const TREINAMENTOS_GRUPO = [
 // Ordem dos cartões de tutoriais (todos os produtos, sem trava).
 export const ORDEM_TUTORIAIS = ['HBOOK', 'HUNIT', 'HBOT', 'HPRICE', 'HCORP']
 
+// Arte dos cards de tutoriais (em public/tutoriais). O hcorp ainda não tem: usa um card "Em breve".
+export const IMAGEM_TUTORIAL = {
+  HBOOK: './tutoriais/hbook.webp',
+  HUNIT: './tutoriais/hunit.png',
+  HBOT: './tutoriais/hai.webp',
+  HPRICE: './tutoriais/hprice.webp',
+}
+
 export const corProduto =(codigo) => CATALOGO[codigo]?.cor ?? '#8a919c'
 export const treinoDoProduto = (codigo) => TREINAMENTOS_GRUPO.find((t) => t.produtos.includes(codigo)) ?? null

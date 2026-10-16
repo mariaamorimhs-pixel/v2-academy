@@ -177,7 +177,6 @@ a.jornada-cartao:hover { border-color: var(--border-forte); }
 .implantacao-destaque { padding: 24px 28px; display: flex; flex-direction: column; gap: 2px; }
 .progresso-implantacao { display: flex; flex-direction: column; gap: 6px; flex: 1 1 220px; }
 .progresso-implantacao .barra span { background: var(--accent); }
-.cartao-tutorial-selo { margin-top: 4px; }
 .implantacao-topo { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
 .implantacao-topo .sobre { margin: 0; }
 .proximo-passo { font-size: 24px; letter-spacing: -0.02em; margin: 2px 0 4px; }
@@ -202,12 +201,18 @@ a.jornada-cartao:hover { border-color: var(--border-forte); }
 .treino-hora { font-size: 14px; font-weight: 600; color: var(--accent); background: var(--accent-bg); padding: 3px 10px; border-radius: 6px; }
 .cartao-treino .btn { margin-top: auto; align-self: flex-start; }
 .grade-tutoriais { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-top: 12px; }
-.cartao-tutorial { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 18px; border-radius: var(--radius);
-  background: color-mix(in srgb, var(--cor) 8%, white); border: 1px solid color-mix(in srgb, var(--cor) 25%, white); color: var(--text); text-decoration: none; transition: border-color .15s, transform .15s; }
-a.cartao-tutorial:hover { border-color: var(--cor); transform: translateY(-2px); }
-.cartao-tutorial b { font-size: 22px; letter-spacing: -0.02em; }
-.cartao-tutorial span:last-child { font-size: 13.5px; color: color-mix(in srgb, var(--cor) 75%, black); }
-.cartao-tutorial.vazio { cursor: default; }
+/* cards de tutoriais: a arte de cada produto (formato 2:3) ocupa o card inteiro */
+.cartao-tutorial { position: relative; display: block; aspect-ratio: 2 / 3; border-radius: 14px; overflow: hidden; background: #111318;
+  text-decoration: none; transition: transform .15s, box-shadow .15s; }
+.cartao-tutorial img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* a arte do hunit veio com margem e borda próprias: amplia um pouco para ficar igual às outras */
+.cartao-tutorial img[src$="hunit.png"] { transform: scale(1.06); }
+a.cartao-tutorial:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(16, 24, 40, .18); }
+/* hcorp sem arte: card escuro no mesmo formato, com o nome e "Em breve" embaixo, como nas artes */
+.cartao-tutorial.vazio { border: 1px solid #2a2e37; cursor: default; }
+.cartao-tutorial-texto { position: absolute; left: 18px; right: 18px; bottom: 22px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; color: #fff; }
+.cartao-tutorial-texto b { font-size: 28px; letter-spacing: -0.02em; line-height: 1; }
+.cartao-tutorial-texto .selo.embreve { background: transparent; color: #c9cdd6; border-color: #5b6170; }
 .seta-passo { width: 22px; text-align: center; color: var(--muted); font-size: 18px; }
 .janela-fundo { position: fixed; inset: 0; z-index: 20; background: rgba(13, 15, 18, .55); display: grid; place-items: center; padding: 24px; }
 .janela { width: min(1000px, 100%); height: min(760px, 100%); background: var(--surface); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }

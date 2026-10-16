@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { dadosDoHotel, nomeReuniao, JanelaCalendly, saudacao, ProgressoImplantacao, Selo } from '../comum.jsx'
-import { CATALOGO, TREINAMENTOS_GRUPO, ORDEM_TUTORIAIS, corProduto, nomeProduto } from '../trilhas.js'
+import { CATALOGO, TREINAMENTOS_GRUPO, ORDEM_TUTORIAIS, IMAGEM_TUTORIAL, corProduto, nomeProduto } from '../trilhas.js'
 
 const IconeVideo = () => (
   <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><rect x="1.5" y="4" width="9" height="8" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.4" /><path d="M10.5 7l4-2.2v6.4l-4-2.2z" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg>
@@ -72,8 +72,14 @@ export default function Inicio({ estado, usuario, hotelId }) {
               <Tag key={codigo} className={`cartao-tutorial ${vazio ? 'vazio' : ''}`} style={{ '--cor': corProduto(codigo) }}
                 aria-label={`Tutoriais de ${nomeProduto(codigo)}: ${vazio ? 'em breve' : p.descricao}`}
                 {...(vazio ? { role: 'group' } : { href: `#/tutoriais/${codigo}` })}>
-                <b>{nomeProduto(codigo)}</b>
-                {vazio ? <span className="cartao-tutorial-selo"><Selo status="embreve" /></span> : <span>{p.descricao}</span>}
+                {IMAGEM_TUTORIAL[codigo] && !vazio ? (
+                  <img src={IMAGEM_TUTORIAL[codigo]} alt="" loading="lazy" />
+                ) : (
+                  <span className="cartao-tutorial-texto">
+                    <b>{nomeProduto(codigo)}</b>
+                    {vazio ? <Selo status="embreve" /> : <span>{p.descricao}</span>}
+                  </span>
+                )}
               </Tag>
             )
           })}
