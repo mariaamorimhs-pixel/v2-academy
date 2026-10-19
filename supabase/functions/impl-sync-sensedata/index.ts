@@ -99,7 +99,9 @@ async function alertarParados(admin: any, token: string) {
       .filter(Boolean).sort()[0]
     const dias = Math.floor((Date.now() - Date.parse(desde)) / 86400000)
     // Mesmo código para a mesma parada: se algo falhar no meio, o Sensedata atualiza em vez de duplicar.
-    const idLegacy = `academy-parado-${h.hotel_id}-${Date.parse(h.ultimo_avanco) / 1000 | 0}-${Date.parse(h.ultimo_acesso) / 1000 | 0}`
+    // (o Sensedata aceita até 50 caracteres)
+    const seg = (iso: string) => Math.floor(Date.parse(iso) / 1000).toString(36)
+    const idLegacy = `acad-parado-${h.hotel_id.slice(0, 8)}-${seg(h.ultimo_avanco)}-${seg(h.ultimo_acesso)}`
     const notas = [
       `O cliente está parado no HSystem Academy há ${dias} dias.`,
       h.motivos.includes('sem_avancar') ? `- Não avança na trilha desde ${fmtBR(h.ultimo_avanco)}.` : null,
