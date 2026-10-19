@@ -25,7 +25,7 @@ const resumoTexto = (r) => r && [
 export default function PainelSensedata({ estado }) {
   const { historico } = estado.integracao ?? { historico: [] }
   const [ocupado, setOcupado] = useState(false)
-  const ultima = historico?.find((h) => h.origem !== 'fases')
+  const ultima = historico?.find((h) => h.origem !== 'fases' && h.origem !== 'parados')
   const pendentes = analistasPendentes(estado)
 
   async function rodar() {
@@ -72,6 +72,64 @@ export default function PainelSensedata({ estado }) {
           <a className="btn" href="#/analistas">Cadastrar em Analistas</a>
         </div>
       )}
+
+      <Parados estado={estado} />
     </section>
+  )
+}
+
+const MOTIVO = { sem_avancar: 'sem avançar', sem_entrar: 'sem entrar' }
+
+// Clientes parados há mais de 7 dias viram tarefa para o CS no Sensedata (todo dia útil às 9h).
+function Parados({ estado }) {
+  const { historico, alertasParado: cfg, alertas = [] } = estado.integracao ?? {}
+  const [ocupado, setOcupado] = useState(false)
+  const ultima = historico?.find((h) => h.origem === 'parados')
+  const nomeHotel = (id) => estado.hoteis.find((h) => h.id === id)?.nome ?? 'Hotel'
+  const somente = cfg?.somente_hoteis ?? []
+
+  async function verificar() {
+    setOcupado(true)
+    const ok = await tentar(() => sincronizarSensedata('parados'))
+    setOcupado(false)
+    if (ok) alert('Verificação concluída.')
+  }
+
+  return (
+    <div className="painel-sense-parados">
+      <div className="painel-sense-topo">
+        <div>
+          <h3>Clientes parados</h3>
+          <p className="muted pequeno">
+            Com {cfg?.dias ?? 7} dias sem avançar ou sem entrar no Academy, o CS recebe uma tarefa no Sensedata (uma por parada).
+            Verifica todo dia útil às 9h.
+          </p>
+        </div>
+        <button className="btn" onClick={verificar} disabled={ocupado}>{ocupado ? 'Verificando…' : 'Verificar agora'}</button>
+      </div>
+      {cfg && !cfg.ativo && <div className="alerta">Desligado.</div>}
+      {somente.length > 0 && (
+        <div className="alerta" role="status">Em teste: só vale para {somente.map(nomeHotel).join(', ')}.</div>
+      )}
+      {ultima && (
+        <p className="pequeno">
+          Última verificação: {fmtDataHora(ultima.terminado_em ?? ultima.iniciado_em)} ·{' '}
+          {ultima.ok ? `${ultima.resumo?.tarefas ?? 0} tarefa(s) criada(s)` : <span className="erro-texto">{ultima.erro}</span>}
+        </p>
+      )}
+      {alertas.length > 0 && (
+        <details className="pequeno">
+          <summary>Tarefas criadas ({alertas.length})</summary>
+          <ul>
+            {alertas.map((a) => (
+              <li key={a.id}>
+                {fmtDataHora(a.criado_em)} · <b>{nomeHotel(a.hotel_id)}</b> · {a.motivos.map((m) => MOTIVO[m] ?? m).join(' e ')} · para {a.responsavel}
+                {!a.ok && <span className="erro-texto"> · não criada: {a.erro}</span>}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
   )
 }

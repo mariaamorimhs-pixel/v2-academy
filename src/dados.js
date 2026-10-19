@@ -27,11 +27,12 @@ export async function recarregar() {
     supabase.from('impl_inscricoes').select('hotel_id, treino_id, por_nome, em'),
     // integração com o Sensedata: só a editora recebe linhas (regras do banco)
     supabase.from('impl_config').select('chave, valor'),
-    supabase.from('impl_sync_log').select('id, origem, iniciado_em, terminado_em, ok, resumo, erro').order('id', { ascending: false }).limit(5),
+    supabase.from('impl_sync_log').select('id, origem, iniciado_em, terminado_em, ok, resumo, erro').order('id', { ascending: false }).limit(15),
+    supabase.from('impl_alertas_parado').select('id, hotel_id, motivos, ref_avanco, ref_acesso, responsavel, ok, erro, criado_em').order('id', { ascending: false }).limit(20),
   ])
   const erro = respostas.find((r) => r.error)?.error
   if (erro) throw new Error(erro.message)
-  const [usuarios, hoteis, contratos, passos, reunioes, conteudo, inscricoes, config, syncLog] = respostas.map((r) => r.data)
+  const [usuarios, hoteis, contratos, passos, reunioes, conteudo, inscricoes, config, syncLog, alertas] = respostas.map((r) => r.data)
 
   const progresso = {}
   for (const h of hoteis) progresso[h.id] = { passos: {}, reunioes: {}, ultimaAtividade: h.ultima_atividade }
@@ -59,6 +60,8 @@ export async function recarregar() {
     inscricoes: inscricoes.reduce((acc, i) => { (acc[i.hotel_id] ??= {})[i.treino_id] = { por: i.por_nome, em: i.em }; return acc }, {}),
     integracao: {
       historico: syncLog,
+      alertasParado: config.find((c) => c.chave === 'alertas_parado')?.valor ?? null,
+      alertas,
     },
   })
 }
@@ -95,8 +98,9 @@ export const salvarAnalista = (id, nome, email, calendly) =>
 export const registrarInscricao = (hotelId, treinoId) => acao('impl_registrar_inscricao', { p_hotel: hotelId, p_treino: treinoId })
 
 // Sincronização com o Sensedata (função impl-sync-sensedata).
-export async function sincronizarSensedata() {
-  const { data, error } = await supabase.functions.invoke('impl-sync-sensedata', { body: {} })
+// modo 'parados' cria as tarefas no Sensedata para os clientes parados.
+export async function sincronizarSensedata(modo) {
+  const { data, error } = await supabase.functions.invoke('impl-sync-sensedata', { body: modo ? { modo } : {} })
   let erro = null
   if (error) {
     erro = error.message

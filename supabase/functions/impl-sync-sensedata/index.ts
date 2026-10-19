@@ -10,6 +10,9 @@
 // atualizados; o CS do cliente vira o analista do hotel quando já existe um analista com o mesmo e-mail (senão fica
 // como pendência para a editora cadastrar).
 //
+// Corpo { modo: 'parados' }: cria no Sensedata uma tarefa para o CS de cada hotel parado há mais de 7 dias
+// (regra em impl_hoteis_parados, supabase/05_parados.sql). Roda todo dia útil às 9h e pelo botão do painel.
+//
 // Precisa do segredo SENSEDATA_TOKEN (Supabase → Edge Functions → Secrets). Nada é apagado do progresso.
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
@@ -30,12 +33,17 @@ const normal = (t: unknown) => String(t ?? '').normalize('NFD').replace(/[\u0300
 const ehPlaybookHibrido = (nome: unknown) => { const n = normal(nome); return n.startsWith('onb') && n.includes('implantacao hibrida') }
 const preenchido = (v: unknown) => v !== null && v !== undefined && String(v).trim() !== '' && v !== false
 
-// GET na API do Sensedata respeitando o limite de chamadas (espera e tenta de novo quando recebe 429).
-async function sense(token: string, caminho: string, params: Record<string, string | number | boolean>) {
+// Chamada à API do Sensedata (GET, ou POST quando tem corpo) respeitando o limite de chamadas
+// (espera e tenta de novo quando recebe 429).
+async function sense(token: string, caminho: string, params: Record<string, string | number | boolean>, corpo?: unknown) {
   const url = new URL(API + caminho)
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v))
   for (let tentativa = 0; tentativa < 4; tentativa++) {
-    const r = await fetch(url, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } })
+    const r = await fetch(url, {
+      method: corpo ? 'POST' : 'GET',
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json', ...(corpo ? { 'Content-Type': 'application/json' } : {}) },
+      body: corpo ? JSON.stringify(corpo) : undefined,
+    })
     if (r.status === 429) { await espera((Number(r.headers.get('x-ratelimit-reset')) || 5) * 1000); continue }
     if (r.status === 401 || r.status === 403) throw new Error('O Sensedata recusou o token (SENSEDATA_TOKEN inválido ou sem permissão).')
     if (!r.ok) throw new Error(`Sensedata respondeu ${r.status} em ${caminho}: ${(await r.text()).slice(0, 200)}`)
@@ -54,6 +62,68 @@ async function todos(token: string, caminho: string, chave: string, params: Reco
     page = r.next_page || 0
   }
   return itens
+}
+
+// ---- tarefas para clientes parados ----
+const dataSP = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(d) // AAAA-MM-DD
+const fmtBR = (iso: string) => new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo' }).format(new Date(iso))
+function diasUteisDepois(iso: string, n: number) {
+  const d = new Date(iso + 'T12:00:00Z')
+  while (n > 0) { d.setUTCDate(d.getUTCDate() + 1); if (d.getUTCDay() !== 0 && d.getUTCDay() !== 6) n-- }
+  return d.toISOString().slice(0, 10)
+}
+// Primeiro item cuja descrição bate com uma das palavras (na ordem de preferência).
+const acha = (lista: any[], palavras: string[]) => {
+  for (const p of palavras) { const x = lista.find((i) => normal(i.description).startsWith(p)); if (x) return x }
+  return null
+}
+
+async function alertarParados(admin: any, token: string) {
+  const { data: parados, error } = await admin.rpc('impl_hoteis_parados')
+  if (error) throw error
+  const resumo = { parados: parados.length, tarefas: 0, hoteis: [] as string[], erros: [] as string[], tipo: '', status: '', prioridade: '' }
+  if (!parados.length) return resumo
+
+  const tipos = ((await sense(token, '/tasks_types', {})).tasks_types ?? []).filter((t: any) => t.enabled !== false)
+  const status = (await sense(token, '/tasks_status', {})).tasks_status ?? []
+  const prioridades = (await sense(token, '/tasks_priorities', {})).tasks_priorities ?? []
+  const tipo = tipos.find((t: any) => t.is_default) ?? tipos[0]
+  const st = acha(status, ['aberta', 'aberto', 'pendente', 'a fazer', 'nao iniciad', 'nova', 'novo', 'open', 'to do'])
+  const pr = acha(prioridades, ['alta', 'high', 'urgente'])
+  if (!tipo || !st || !pr) throw new Error(`Não achei no Sensedata ${!tipo ? 'um tipo de atividade' : !st ? 'um status de atividade aberta' : 'a prioridade Alta'}.`)
+  Object.assign(resumo, { tipo: tipo.description, status: st.description, prioridade: pr.description })
+
+  const hoje = dataSP(new Date())
+  for (const h of parados) {
+    const desde = [h.motivos.includes('sem_avancar') ? h.ultimo_avanco : null, h.motivos.includes('sem_entrar') ? h.ultimo_acesso : null]
+      .filter(Boolean).sort()[0]
+    const dias = Math.floor((Date.now() - Date.parse(desde)) / 86400000)
+    // Mesmo código para a mesma parada: se algo falhar no meio, o Sensedata atualiza em vez de duplicar.
+    const idLegacy = `academy-parado-${h.hotel_id}-${Date.parse(h.ultimo_avanco) / 1000 | 0}-${Date.parse(h.ultimo_acesso) / 1000 | 0}`
+    const notas = [
+      `O cliente está parado no HSystem Academy há ${dias} dias.`,
+      h.motivos.includes('sem_avancar') ? `- Não avança na trilha desde ${fmtBR(h.ultimo_avanco)}.` : null,
+      h.motivos.includes('sem_entrar') ? `- Ninguém do hotel entra no Academy desde ${fmtBR(h.ultimo_acesso)}.` : null,
+      'Entre em contato com o cliente para entender o motivo e ajudar a retomar a implantação.',
+      '(Tarefa criada automaticamente pelo HSystem Academy.)',
+    ].filter(Boolean).join('\n')
+    const registro = { hotel_id: h.hotel_id, motivos: h.motivos, ref_avanco: h.ultimo_avanco, ref_acesso: h.ultimo_acesso, tarefa_id_legacy: idLegacy, responsavel: h.cs_email }
+    try {
+      await sense(token, '/tasks', {}, { tasks: [{
+        id_legacy: idLegacy, customer: { id: Number(h.sensedata_id) },
+        description: `Cliente parado no HSystem Academy há ${dias} dias`, notes: notas,
+        start_date: hoje, due_date: diasUteisDepois(hoje, 2),
+        type: { id: tipo.id }, status: { id: st.id }, priority: { id: pr.id }, owner: { email: h.cs_email },
+      }] })
+      await admin.from('impl_alertas_parado').insert({ ...registro, ok: true })
+      resumo.tarefas++; resumo.hoteis.push(h.nome)
+    } catch (e) {
+      const erro = String((e as Error)?.message ?? e)
+      await admin.from('impl_alertas_parado').insert({ ...registro, ok: false, erro })
+      resumo.erros.push(`${h.nome}: ${erro}`)
+    }
+  }
+  return resumo
 }
 
 Deno.serve(async (req) => {
@@ -76,7 +146,9 @@ Deno.serve(async (req) => {
     if (eu?.perfil !== 'editora') return resposta({ erro: 'Só a editora pode sincronizar' }, 403)
     origem = 'manual'
   }
-  const { data: log } = await admin.from('impl_sync_log').insert({ origem }).select('id').single()
+  const corpo = await req.json().catch(() => ({}))
+  const parados = corpo?.modo === 'parados'
+  const { data: log } = await admin.from('impl_sync_log').insert({ origem: parados ? 'parados' : origem }).select('id').single()
   const fechar = async (ok: boolean, resumo: unknown, erro?: string) => {
     await admin.from('impl_sync_log').update({ terminado_em: new Date().toISOString(), ok, resumo, erro: erro ?? null }).eq('id', log!.id)
     return resposta(ok ? { ok, resumo } : { ok, erro, resumo }, ok ? 200 : 400)
@@ -85,6 +157,11 @@ Deno.serve(async (req) => {
   try {
     const token = Deno.env.get('SENSEDATA_TOKEN')
     if (!token) return await fechar(false, null, 'Falta salvar o token do Sensedata no Supabase (Edge Functions → Secrets → SENSEDATA_TOKEN).')
+
+    if (parados) {
+      const r = await alertarParados(admin, token)
+      return await fechar(r.erros.length === 0, r, r.erros.length ? `${r.erros.length} tarefa(s) não criada(s)` : undefined)
+    }
 
     // ---- quais playbooks contam ----
     const playbooks = (await sense(token, '/playbooks', {})).playbooks ?? []
