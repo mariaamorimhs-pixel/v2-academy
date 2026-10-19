@@ -29,6 +29,11 @@ Escopo completo: documento "Escopo — Implantação Híbrida HSystem" (Claude D
 - Precisa do segredo `SENSEDATA_TOKEN` na função. Não gerar chave nova no Sensedata: ela é única por ambiente
   e uma chave nova derruba as outras integrações que usam a atual.
 - Convites continuam pelo botão (não são enviados na sincronização).
+- **Clientes parados** (`supabase/05_parados.sql`): todo dia útil às 9h a função (modo `parados`) cria no Sensedata uma
+  tarefa para o CS de cada hotel com 7 dias sem avançar ou sem ninguém entrar no Academy (uma tarefa por parada;
+  prazo de 2 dias úteis, prioridade Alta). Não entram hotéis sem convite, com reunião agendada ou com a jornada concluída.
+  Liga/desliga e modo de teste em `impl_config` → `alertas_parado` (`somente_hoteis` vazio = todos). Histórico em
+  `impl_alertas_parado` e no painel de Hotéis.
 
 ## Ainda não feito
 - A trava da ordem é aplicada na tela; o banco ainda não impede concluir um passo fora de ordem.
