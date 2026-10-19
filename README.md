@@ -5,7 +5,7 @@ Cada hotel em onboarding no Sensedata recebe só as trilhas dos produtos contrat
 Escopo completo: documento "Escopo — Implantação Híbrida HSystem" (Claude Docs).
 
 ## Onde fica cada parte
-- **Banco**: Supabase, projeto `edqboyyzkbiaevptunrz`, tabelas com prefixo `impl_`
+- **Banco**: Supabase, projeto `bapvpfbvwktwbnymwrje`, tabelas com prefixo `impl_`
   (`impl_hoteis`, `impl_usuarios`, `impl_contratos`, `impl_passos_feitos`, `impl_reunioes`, `impl_conteudo`).
   Leitura protegida por RLS (cliente vê o próprio hotel, analista os seus, admin tudo).
   Gravação só pelas funções `impl_*` (concluir passo, agendar/confirmar reunião, editar conteúdo,
