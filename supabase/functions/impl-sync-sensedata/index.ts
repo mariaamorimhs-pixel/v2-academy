@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
     const resumo = {
       playbooks: escolhidos.map((p: any) => p.name), clientes: 0, hoteis_novos: 0, hoteis_atualizados: 0, contratos: 0, contatos_novos: 0, contatos_atualizados: 0,
       analistas_pendentes: [] as { nome: string; email: string; hotel: string }[],
-      conflitos: [] as string[], erros: [] as string[],
+      conflitos: [] as string[], erros: [] as string[], fora: [] as string[], campo: '',
     }
 
     // Clientes que receberam o playbook (pelas atividades que ele gerou)
@@ -105,9 +105,28 @@ Deno.serve(async (req) => {
       const tarefas = await todos(token, '/tasks', 'tasks', { 'playbook:id': p.id })
       for (const t of tarefas) if (t.customer?.id) comPlaybook.add(String(t.customer.id))
     }
-    // Clientes com o campo implantacao_academy preenchido
-    const comCampo = await todos(token, '/customers', 'customers', { [`custom_fields:${CAMPO}:empty`]: false })
-    const clientes = comCampo.filter((c) => preenchido(c.custom_fields?.[CAMPO]?.value) && comPlaybook.has(String(c.id)))
+    // Campo implantacao_academy: acha o nome interno pela configuração (aceita o nome interno ou o título)
+    const config = (await sense(token, '/custom_fields/config/customer', {})).custom_fields ?? []
+    const alvo = normal(CAMPO).replace(/_/g, ' ')
+    const campo = config.find((f: any) => normal(f.name).replace(/_/g, ' ') === alvo)
+      ?? config.find((f: any) => normal(f.title).replace(/_/g, ' ') === alvo)
+      ?? config.find((f: any) => normal(f.name + ' ' + f.title).replace(/_/g, ' ').includes('academy'))
+    if (!campo) return await fechar(false, { campos_cliente: config.map((f: any) => f.name) }, `Não achei no Sensedata o campo de cliente "${CAMPO}".`)
+    const nomeCampo = campo.name as string
+    resumo.campo = nomeCampo
+
+    // Clientes com o campo preenchido
+    const comCampo = await todos(token, '/customers', 'customers', { [`custom_fields:${nomeCampo}:empty`]: false })
+    const clientes = comCampo.filter((c) => preenchido(c.custom_fields?.[nomeCampo]?.value) && comPlaybook.has(String(c.id)))
+    // Quem tem o playbook mas ficou de fora (para a editora entender no histórico)
+    const dentro = new Set(clientes.map((c) => String(c.id)))
+    for (const id of [...comPlaybook].filter((id) => !dentro.has(id)).slice(0, 20)) {
+      try {
+        const r = (await sense(token, `/customers/${id}`, {})).customers
+        const c = Array.isArray(r) ? r[0] : r
+        resumo.fora.push(`${c?.name ?? 'Cliente ' + id}: campo ${nomeCampo} vazio (valor: ${JSON.stringify(c?.custom_fields?.[nomeCampo]?.value ?? null)})`)
+      } catch { resumo.fora.push(`Cliente ${id}: não consegui consultar`) }
+    }
     Object.assign(resumo, { com_playbook: comPlaybook.size, com_campo: comCampo.length, clientes: clientes.length })
 
     for (const c of clientes) {

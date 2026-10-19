@@ -61,6 +61,9 @@ export default function PainelSensedata({ estado }) {
       {ultima?.resumo?.conflitos?.length > 0 && (
         <details className="pequeno"><summary>Ver conflitos de e-mail</summary><ul>{ultima.resumo.conflitos.map((c) => <li key={c}>{c}</li>)}</ul></details>
       )}
+      {ultima?.resumo?.fora?.length > 0 && (
+        <details className="pequeno"><summary>{ultima.resumo.fora.length} cliente(s) com o playbook ficaram de fora</summary><ul>{ultima.resumo.fora.map((c) => <li key={c}>{c}</li>)}</ul></details>
+      )}
 
       {pendentes.length > 0 && (
         <div className="alerta aviso-analista" role="status">
