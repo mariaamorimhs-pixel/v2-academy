@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { fmtDataHora, tentar } from '../comum.jsx'
-import { sincronizarSensedata, salvarFases } from '../dados.js'
+import { sincronizarSensedata } from '../dados.js'
 
 // Analistas do Sensedata (campo CS dos clientes) que ainda não estão cadastrados no Academy.
 export function analistasPendentes(estado) {
@@ -15,34 +15,25 @@ export function analistasPendentes(estado) {
 }
 
 const resumoTexto = (r) => r && [
-  `${r.clientes} cliente(s) nas fases`,
+  `${r.clientes} cliente(s) na implantação híbrida`,
   `${r.hoteis_novos} hotel(éis) novo(s)`,
   `${r.contatos_novos} usuário(s) novo(s)`,
   r.conflitos?.length ? `${r.conflitos.length} conflito(s) de e-mail` : null,
 ].filter(Boolean).join(' · ')
 
-// Painel da editora: status da última sincronização, escolha das Fases e botões de ação.
+// Painel da editora: regra de entrada, status da última sincronização e botão de sincronizar.
 export default function PainelSensedata({ estado }) {
-  const { fases, fasesEncontradas, historico } = estado.integracao ?? { fases: [], fasesEncontradas: [], historico: [] }
-  const [ocupado, setOcupado] = useState(null) // 'sincronizar' | 'fases' | 'salvar'
-  const [escolhidas, setEscolhidas] = useState(null) // null = usar as salvas
-  const marcadas = escolhidas ?? fases
+  const { historico } = estado.integracao ?? { historico: [] }
+  const [ocupado, setOcupado] = useState(false)
   const ultima = historico?.find((h) => h.origem !== 'fases')
   const pendentes = analistasPendentes(estado)
-  const mudouFases = escolhidas && JSON.stringify([...escolhidas].sort()) !== JSON.stringify([...fases].sort())
 
-  async function rodar(modo) {
-    setOcupado(modo)
-    const ok = await tentar(() => sincronizarSensedata(modo))
-    setOcupado(null)
-    if (ok && modo === 'sincronizar') alert('Sincronização concluída.')
+  async function rodar() {
+    setOcupado(true)
+    const ok = await tentar(() => sincronizarSensedata())
+    setOcupado(false)
+    if (ok) alert('Sincronização concluída.')
   }
-  async function salvar() {
-    setOcupado('salvar')
-    if (await tentar(() => salvarFases(marcadas))) setEscolhidas(null)
-    setOcupado(null)
-  }
-  const alternar = (fase) => setEscolhidas(marcadas.includes(fase) ? marcadas.filter((f) => f !== fase) : [...marcadas, fase])
 
   return (
     <section className="cartao painel-sense" aria-labelledby="t-sense">
@@ -55,38 +46,21 @@ export default function PainelSensedata({ estado }) {
               : 'Ainda não sincronizado.'}
           </p>
         </div>
-        <button className="btn primario" onClick={() => rodar('sincronizar')} disabled={!!ocupado || !fases.length}
-          title={!fases.length ? 'Escolha as Fases antes de sincronizar' : undefined}>
-          {ocupado === 'sincronizar' ? 'Sincronizando…' : 'Sincronizar agora'}
+        <button className="btn primario" onClick={rodar} disabled={ocupado}>
+          {ocupado ? 'Sincronizando…' : 'Sincronizar agora'}
         </button>
       </div>
+
+      <p className="pequeno">
+        Entram só os clientes com o playbook <b>Onboarding - Implantação Híbrida</b> e o campo <b>implantacao_academy</b> preenchido.
+        Depois da primeira sincronização que der certo, ela também roda sozinha de hora em hora.
+      </p>
 
       {ultima && !ultima.ok && <div className="alerta erro">{ultima.erro}</div>}
       {ultima?.ok && <p className="pequeno">{resumoTexto(ultima.resumo)}</p>}
       {ultima?.resumo?.conflitos?.length > 0 && (
         <details className="pequeno"><summary>Ver conflitos de e-mail</summary><ul>{ultima.resumo.conflitos.map((c) => <li key={c}>{c}</li>)}</ul></details>
       )}
-
-      <div className="painel-sense-fases">
-        <h3>Fases do Sensedata que entram na esteira</h3>
-        {fasesEncontradas.length === 0 ? (
-          <p className="muted pequeno">Clique em "Buscar fases" para listar as Fases existentes no Sensedata e escolher as de onboarding.</p>
-        ) : (
-          <div className="fases-lista">
-            {fasesEncontradas.map(({ fase, qtd }) => (
-              <label key={fase} className="check-filtro">
-                <input type="checkbox" checked={marcadas.includes(fase)} onChange={() => alternar(fase)} />
-                {fase} <span className="muted">({qtd})</span>
-              </label>
-            ))}
-          </div>
-        )}
-        <div className="acoes">
-          <button className="btn" onClick={() => rodar('fases')} disabled={!!ocupado}>{ocupado === 'fases' ? 'Buscando…' : 'Buscar fases'}</button>
-          {mudouFases && <button className="btn primario" onClick={salvar} disabled={!!ocupado}>{ocupado === 'salvar' ? 'Salvando…' : 'Salvar fases'}</button>}
-          {!mudouFases && fases.length > 0 && <span className="muted pequeno">Em uso: {fases.join(', ')}</span>}
-        </div>
-      </div>
 
       {pendentes.length > 0 && (
         <div className="alerta aviso-analista" role="status">

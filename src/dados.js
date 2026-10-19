@@ -58,8 +58,6 @@ export async function recarregar() {
     conteudo: Object.fromEntries(conteudo.map((c) => [c.passo_id, semNulos({ titulo: c.titulo, video: c.video, texto: c.texto })])),
     inscricoes: inscricoes.reduce((acc, i) => { (acc[i.hotel_id] ??= {})[i.treino_id] = { por: i.por_nome, em: i.em }; return acc }, {}),
     integracao: {
-      fases: config.find((c) => c.chave === 'fases_onboarding')?.valor ?? [],
-      fasesEncontradas: config.find((c) => c.chave === 'fases_encontradas')?.valor ?? [],
       historico: syncLog,
     },
   })
@@ -96,11 +94,9 @@ export const salvarAnalista = (id, nome, email, calendly) =>
 // Inscrição feita pela janela do Calendly (o Calendly avisa a página quando a pessoa conclui).
 export const registrarInscricao = (hotelId, treinoId) => acao('impl_registrar_inscricao', { p_hotel: hotelId, p_treino: treinoId })
 
-export const salvarFases = (fases) => acao('impl_salvar_fases', { p_fases: fases })
-
-// Sincronização com o Sensedata (função impl-sync-sensedata). modo: 'sincronizar' | 'fases'
-export async function sincronizarSensedata(modo = 'sincronizar') {
-  const { data, error } = await supabase.functions.invoke('impl-sync-sensedata', { body: { modo } })
+// Sincronização com o Sensedata (função impl-sync-sensedata).
+export async function sincronizarSensedata() {
+  const { data, error } = await supabase.functions.invoke('impl-sync-sensedata', { body: {} })
   let erro = null
   if (error) {
     erro = error.message

@@ -4,11 +4,11 @@
 // a chave interna guardada em impl_segredos no cabeçalho x-sync-chave. Publicar com verify_jwt desligado:
 // a própria função confere uma das duas formas de acesso.
 //
-// Corpo: { modo: 'sincronizar' (padrão) | 'fases' }
-//  - sincronizar: clientes cuja Fase está em impl_config.fases_onboarding viram hotéis; contratos (campo Plano
-//    e fim da vigência) e contatos ativos com e-mail são atualizados; o CS do cliente vira o analista do hotel
-//    quando já existe um analista com o mesmo e-mail (senão fica como pendência para a editora cadastrar).
-//  - fases: lista as Fases existentes no Sensedata (com quantidade de clientes) para a editora escolher.
+// Quem entra: só clientes com o campo customizado `implantacao_academy` preenchido E com o playbook
+// "Onboarding - Implantação Híbrida" disparado (procurado pelo nome, sem diferenciar acento/maiúscula).
+// Para cada um: o cliente vira hotel; contratos (campo Plano e fim da vigência) e contatos ativos com e-mail são
+// atualizados; o CS do cliente vira o analista do hotel quando já existe um analista com o mesmo e-mail (senão fica
+// como pendência para a editora cadastrar).
 //
 // Precisa do segredo SENSEDATA_TOKEN (Supabase → Edge Functions → Secrets). Nada é apagado do progresso.
 import { createClient } from 'jsr:@supabase/supabase-js@2'
@@ -22,6 +22,13 @@ const cors = {
 const resposta = (corpo: unknown, status = 200) =>
   new Response(JSON.stringify(corpo), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
 const espera = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+const PLAYBOOK = 'Onboarding - Implantação Híbrida'
+const CAMPO = 'implantacao_academy'
+const normal = (t: unknown) => String(t ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim()
+// Aceita pequenas variações de escrita (ex.: "Onbording - implantação hibrida").
+const ehPlaybookHibrido = (nome: unknown) => { const n = normal(nome); return n.startsWith('onb') && n.includes('implantacao hibrida') }
+const preenchido = (v: unknown) => v !== null && v !== undefined && String(v).trim() !== '' && v !== false
 
 // GET na API do Sensedata respeitando o limite de chamadas (espera e tenta de novo quando recebe 429).
 async function sense(token: string, caminho: string, params: Record<string, string | number | boolean>) {
@@ -69,10 +76,7 @@ Deno.serve(async (req) => {
     if (eu?.perfil !== 'editora') return resposta({ erro: 'Só a editora pode sincronizar' }, 403)
     origem = 'manual'
   }
-  const corpo = await req.json().catch(() => ({}))
-  const modo = corpo?.modo === 'fases' ? 'fases' : 'sincronizar'
-
-  const { data: log } = await admin.from('impl_sync_log').insert({ origem: modo === 'fases' ? 'fases' : origem }).select('id').single()
+  const { data: log } = await admin.from('impl_sync_log').insert({ origem }).select('id').single()
   const fechar = async (ok: boolean, resumo: unknown, erro?: string) => {
     await admin.from('impl_sync_log').update({ terminado_em: new Date().toISOString(), ok, resumo, erro: erro ?? null }).eq('id', log!.id)
     return resposta(ok ? { ok, resumo } : { ok, erro, resumo }, ok ? 200 : 400)
@@ -82,35 +86,29 @@ Deno.serve(async (req) => {
     const token = Deno.env.get('SENSEDATA_TOKEN')
     if (!token) return await fechar(false, null, 'Falta salvar o token do Sensedata no Supabase (Edge Functions → Secrets → SENSEDATA_TOKEN).')
 
-    // ---- modo descobrir fases ----
-    if (modo === 'fases') {
-      const clientes = await todos(token, '/customers', 'customers')
-      const contagem: Record<string, number> = {}
-      for (const c of clientes) { const f = (c.stage ?? '').trim() || '(sem fase)'; contagem[f] = (contagem[f] ?? 0) + 1 }
-      const fases = Object.entries(contagem).map(([fase, qtd]) => ({ fase, qtd })).sort((a, b) => b.qtd - a.qtd)
-      await admin.from('impl_config').update({ valor: fases, atualizado_em: new Date().toISOString() }).eq('chave', 'fases_encontradas')
-      return await fechar(true, { clientes: clientes.length, fases })
-    }
-
-    // ---- modo sincronizar ----
-    const { data: cfg } = await admin.from('impl_config').select('valor').eq('chave', 'fases_onboarding').single()
-    const fases: string[] = Array.isArray(cfg?.valor) ? cfg!.valor : []
-    if (!fases.length) return await fechar(false, null, 'Escolha quais Fases do Sensedata entram na esteira antes de sincronizar.')
+    // ---- quais playbooks contam ----
+    const playbooks = (await sense(token, '/playbooks', {})).playbooks ?? []
+    const escolhidos = playbooks.filter((p: any) => ehPlaybookHibrido(p.name))
+    if (!escolhidos.length) return await fechar(false, null, `Não achei no Sensedata um playbook com o nome "${PLAYBOOK}".`)
 
     const { data: analistas } = await admin.from('impl_usuarios').select('id, email').eq('perfil', 'analista')
     const analistaPorEmail = new Map((analistas ?? []).map((a) => [a.email, a.id]))
     const resumo = {
-      fases, clientes: 0, hoteis_novos: 0, hoteis_atualizados: 0, contratos: 0, contatos_novos: 0, contatos_atualizados: 0,
+      playbooks: escolhidos.map((p: any) => p.name), clientes: 0, hoteis_novos: 0, hoteis_atualizados: 0, contratos: 0, contatos_novos: 0, contatos_atualizados: 0,
       analistas_pendentes: [] as { nome: string; email: string; hotel: string }[],
       conflitos: [] as string[], erros: [] as string[],
     }
 
-    const clientes: any[] = []
-    for (const fase of fases) {
-      const lista = await todos(token, '/customers', 'customers', { stage: fase })
-      clientes.push(...lista.filter((c) => (c.stage ?? '').trim() === fase))
+    // Clientes que receberam o playbook (pelas atividades que ele gerou)
+    const comPlaybook = new Set<string>()
+    for (const p of escolhidos) {
+      const tarefas = await todos(token, '/tasks', 'tasks', { 'playbook:id': p.id })
+      for (const t of tarefas) if (t.customer?.id) comPlaybook.add(String(t.customer.id))
     }
-    resumo.clientes = clientes.length
+    // Clientes com o campo implantacao_academy preenchido
+    const comCampo = await todos(token, '/customers', 'customers', { [`custom_fields:${CAMPO}:empty`]: false })
+    const clientes = comCampo.filter((c) => preenchido(c.custom_fields?.[CAMPO]?.value) && comPlaybook.has(String(c.id)))
+    Object.assign(resumo, { com_playbook: comPlaybook.size, com_campo: comCampo.length, clientes: clientes.length })
 
     for (const c of clientes) {
       try {

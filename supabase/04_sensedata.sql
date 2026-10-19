@@ -67,3 +67,18 @@ select cron.schedule('impl-sync-sensedata-hora-em-hora', '7 * * * *', $$
     body := '{}'::jsonb, timeout_milliseconds := 120000)
   where jsonb_array_length(coalesce((select valor from public.impl_config where chave = 'fases_onboarding'), '[]'::jsonb)) > 0;
 $$);
+
+-- Mudança: só entram clientes com o playbook "Onboarding - Implantação Híbrida" e o campo implantacao_academy
+-- preenchido (as Fases deixaram de ser usadas). O agendamento passa a rodar depois da primeira sincronização
+-- manual que der certo.
+select cron.alter_job(
+  (select jobid from cron.job where jobname = 'impl-sync-sensedata-hora-em-hora'),
+  command := $c$
+  select net.http_post(
+    url := 'https://bapvpfbvwktwbnymwrje.supabase.co/functions/v1/impl-sync-sensedata',
+    headers := jsonb_build_object('Content-Type', 'application/json', 'x-sync-chave', (select valor from public.impl_segredos where chave = 'sync_chave')),
+    body := '{}'::jsonb,
+    timeout_milliseconds := 120000
+  )
+  where exists (select 1 from public.impl_sync_log where ok and origem = 'manual');
+  $c$);
