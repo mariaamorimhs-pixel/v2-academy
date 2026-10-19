@@ -20,8 +20,16 @@ Escopo completo: documento "Escopo — Implantação Híbrida HSystem" (Claude D
 - Quem pode entrar: e-mails cadastrados em `impl_usuarios`. Os hotéis com `teste = true` são dados de teste.
   A editora pode "Ver como o cliente" de qualquer hotel e zerar o progresso dos hotéis de teste.
 
+## Integração com o Sensedata
+- Função `impl-sync-sensedata`: clientes cuja **Fase** está entre as escolhidas viram hotéis; contratos (campo
+  **Plano** + fim da vigência) definem os produtos; contatos ativos com e-mail viram usuários do hotel; o **CS**
+  do cliente vira o analista (se já cadastrado pelo e-mail; senão aparece como pendência em Hotéis e Analistas).
+- Roda de hora em hora (pg_cron) e pelo botão "Sincronizar agora" (Hotéis, perfil editora). Histórico em `impl_sync_log`.
+- Precisa do segredo `SENSEDATA_TOKEN` na função. Não gerar chave nova no Sensedata: ela é única por ambiente
+  e uma chave nova derruba as outras integrações que usam a atual.
+- Convites continuam pelo botão (não são enviados na sincronização).
+
 ## Ainda não feito
-- Sincronização com o Sensedata (hotéis, contratos, contatos). Hoje os hotéis são de teste.
 - A trava da ordem é aplicada na tela; o banco ainda não impede concluir um passo fora de ordem.
 
 ## Rodar no computador

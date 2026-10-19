@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { salvarAnalista, enviarConvite } from '../dados.js'
 import { tentar, fmtData } from '../comum.jsx'
+import { analistasPendentes } from './Sensedata.jsx'
 
 // Analistas cadastrados pela editora, com o link do Calendly que aparece para os clientes de cada um.
 export default function Analistas({ estado }) {
@@ -16,6 +17,7 @@ export default function Analistas({ estado }) {
       <div className="cartao">
         {analistas.map((a) => <LinhaAnalista key={a.id} analista={a} hoteis={estado.hoteis.filter((h) => h.analistaId === a.id).length} />)}
       </div>
+      <Pendentes estado={estado} />
       <NovoAnalista />
     </>
   )
@@ -83,5 +85,32 @@ export function BotaoConvite({ usuario }) {
         {enviando ? 'Enviando…' : usuario.convidadoEm ? 'Reenviar convite' : 'Enviar convite'}
       </button>
     </span>
+  )
+}
+
+// Analistas que aparecem como CS no Sensedata mas ainda não estão cadastrados: cadastro em um clique
+// (os hotéis deles passam a ser deles na hora).
+function Pendentes({ estado }) {
+  const pendentes = analistasPendentes(estado)
+  const [cadastrando, setCadastrando] = useState(null)
+  if (!pendentes.length) return null
+  async function cadastrar(p) {
+    setCadastrando(p.email)
+    await tentar(() => salvarAnalista(null, p.nome, p.email, ''))
+    setCadastrando(null)
+  }
+  return (
+    <section className="cartao pendentes-analistas">
+      <h2>Vindos do Sensedata, ainda não cadastrados</h2>
+      <p className="muted pequeno">São os CS dos hotéis sincronizados. Cadastre para que eles vejam seus hotéis; depois envie o convite.</p>
+      <ul className="lista-simples">
+        {pendentes.map((p) => (
+          <li key={p.email}>
+            <span><b>{p.nome}</b><br /><span className="muted pequeno">{p.email} · {p.hoteis.length} hotel(éis): {p.hoteis.slice(0, 3).join(', ')}{p.hoteis.length > 3 ? '…' : ''}</span></span>
+            <button className="btn" onClick={() => cadastrar(p)} disabled={cadastrando === p.email}>{cadastrando === p.email ? 'Cadastrando…' : 'Cadastrar'}</button>
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }

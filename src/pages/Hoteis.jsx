@@ -1,5 +1,6 @@
 import { dadosDoHotel, Barra, fmtDataHora, diasDesde, nomeReuniao } from '../comum.jsx'
 import { nomeProduto, corProduto } from '../trilhas.js'
+import PainelSensedata from './Sensedata.jsx'
 
 // Onde cada hotel está: produto atual, % concluído, situação da reunião e há quantos dias está parado.
 export function situacaoDoHotel(d) {
@@ -42,6 +43,8 @@ export default function Hoteis({ estado, usuario, todos }) {
         </div>
       </header>
 
+      {todos && <PainelSensedata estado={estado} />}
+
       <div className="cartao tabela-cartao">
         <table className="tabela">
           <thead>
@@ -58,7 +61,7 @@ export default function Hoteis({ estado, usuario, todos }) {
             {linhas.map((l) => (
               <tr key={l.hotel.id} onClick={() => { window.location.hash = `/hotel/${l.hotel.id}` }}>
                 <td><a href={`#/hotel/${l.hotel.id}`}><b>{l.hotel.nome}</b></a><br /><span className="muted pequeno">{l.hotel.cidade}</span></td>
-                {todos && <td>{l.analista?.nome}</td>}
+                {todos && <td>{l.analista?.nome ?? (l.hotel.csEmail ? <span className="selo alerta" title={l.hotel.csEmail}>⚠ {l.hotel.csNome || l.hotel.csEmail} (não cadastrado)</span> : <span className="muted">—</span>)}</td>}
                 <td>{l.cor ? <span className="produto-rotulo" style={{ '--cor': l.cor }}>{l.etapa}</span> : l.etapa}</td>
                 <td className="col-pct"><Barra pct={l.prog.pct} fina /><span className="pequeno">{l.prog.pct}%</span></td>
                 <td>{l.reuniao ? <span className={`selo ${l.reuniao.tipo === 'agendada' ? 'atual' : 'alerta'}`}>{l.reuniao.texto}</span> : <span className="muted">—</span>}</td>

@@ -535,3 +535,16 @@ html[data-tema="escuro"] .anel-progresso .anel-valor { stroke: color-mix(in srgb
 .cartao-tutorial.vazio { background: transparent; border: 1.5px dashed var(--border-forte); }
 .cartao-tutorial.vazio .cartao-tutorial-texto { color: var(--muted); }
 .cartao-tutorial.vazio .cartao-tutorial-texto .selo.embreve { color: var(--muted); border-color: var(--border-forte); }
+
+/* ---- Integração com o Sensedata (editora) ---- */
+.painel-sense { margin-bottom: 20px; display: flex; flex-direction: column; gap: 14px; }
+.painel-sense-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.painel-sense h2 { font-size: 18px; margin-bottom: 2px; }
+.painel-sense h3 { text-transform: none; letter-spacing: 0; font-size: 15px; color: var(--text); margin: 0 0 8px; }
+.painel-sense-fases .acoes { margin-top: 10px; align-items: center; }
+.fases-lista { display: flex; flex-wrap: wrap; gap: 8px; }
+.erro-texto { color: var(--crit); font-weight: 600; }
+.aviso-analista { background: var(--warn-bg); color: var(--text); border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent); display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.aviso-analista b { color: var(--warn); }
+.aviso-analista ul { margin: 0; padding-left: 18px; }
+.pendentes-analistas { margin-top: 16px; }
