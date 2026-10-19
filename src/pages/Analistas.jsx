@@ -3,7 +3,7 @@ import { salvarAnalista, enviarConvite } from '../dados.js'
 import { tentar, fmtData } from '../comum.jsx'
 import { analistasPendentes } from './Sensedata.jsx'
 
-// Analistas cadastrados pela editora, com o link do Calendly que aparece para os clientes de cada um.
+// Analistas cadastrados pelo admin, com o link do Calendly que aparece para os clientes de cada um.
 export default function Analistas({ estado }) {
   const analistas = estado.usuarios.filter((u) => u.perfil === 'analista').sort((a, b) => a.nome.localeCompare(b.nome))
   return (

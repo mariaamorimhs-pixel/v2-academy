@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { dadosDoHotel, diasDesde } from '../comum.jsx'
 import { CATALOGO } from '../trilhas.js'
 
-// Dashboard da editora: resumo geral das implantações e, por produto, o funil por etapa
+// Dashboard (admin: todos os hotéis; analista: só os dele, pelas regras do banco): resumo geral das implantações e, por produto, o funil por etapa
 // (quantos hotéis já concluíram cada etapa) com o gargalo (etapa onde mais hotéis estão parados agora;
 // só conta como gargalo com 2 ou mais hotéis, para empates de 1 não virarem alerta).
 
@@ -48,17 +48,22 @@ function calcular(estado, incluirTeste) {
   return { resumo, produtos }
 }
 
-export default function Dashboard({ estado }) {
+export default function Dashboard({ estado, usuario }) {
   const [incluirTeste, setIncluirTeste] = useState(false)
   const { resumo, produtos } = useMemo(() => calcular(estado, incluirTeste), [estado, incluirTeste])
   const qtdTeste = estado.hoteis.filter((h) => h.teste).length
+  const analista = usuario?.perfil === 'analista'
 
   return (
     <>
       <header className="cabecalho">
         <div>
           <h1>Dashboard</h1>
-          <p className="muted">Andamento das implantações e dos treinamentos por produto.</p>
+          <p className="muted">
+            {analista
+              ? <>Andamento dos seus hotéis e dos treinamentos por produto. A lista completa está em <a href="#/hoteis">Meus hotéis</a>.</>
+              : 'Andamento das implantações e dos treinamentos por produto.'}
+          </p>
         </div>
         <label className="check-filtro">
           <input type="checkbox" checked={incluirTeste} onChange={(e) => setIncluirTeste(e.target.checked)} />
@@ -68,7 +73,7 @@ export default function Dashboard({ estado }) {
 
       {resumo.total === 0 ? (
         <div className="cartao vazio-cartao">
-          <p>Ainda não há hotéis reais em implantação.</p>
+          <p>{analista ? 'Você ainda não tem hotéis reais em implantação.' : 'Ainda não há hotéis reais em implantação.'}</p>
           <p className="muted pequeno">Marque "Incluir hotéis de teste" para ver os números com os dados de teste.</p>
         </div>
       ) : (

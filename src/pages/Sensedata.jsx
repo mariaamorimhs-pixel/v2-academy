@@ -21,7 +21,7 @@ const resumoTexto = (r) => r && [
   r.conflitos?.length ? `${r.conflitos.length} conflito(s) de e-mail` : null,
 ].filter(Boolean).join(' · ')
 
-// Painel da editora: regra de entrada, status da última sincronização e botão de sincronizar.
+// Painel do admin: regra de entrada, status da última sincronização e botão de sincronizar.
 export default function PainelSensedata({ estado }) {
   const { historico } = estado.integracao ?? { historico: [] }
   const [ocupado, setOcupado] = useState(false)

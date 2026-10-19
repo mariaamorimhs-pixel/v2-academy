@@ -25,7 +25,7 @@ export async function recarregar() {
     supabase.from('impl_reunioes').select('hotel_id, numero, agendada_para, agendada_em, realizada_em, realizada_por'),
     supabase.from('impl_conteudo').select('passo_id, titulo, video, texto'),
     supabase.from('impl_inscricoes').select('hotel_id, treino_id, por_nome, em'),
-    // integração com o Sensedata: só a editora recebe linhas (regras do banco)
+    // integração com o Sensedata: só o admin recebe linhas (regras do banco)
     supabase.from('impl_config').select('chave, valor'),
     supabase.from('impl_sync_log').select('id, origem, iniciado_em, terminado_em, ok, resumo, erro').order('id', { ascending: false }).limit(15),
     supabase.from('impl_alertas_parado').select('id, hotel_id, motivos, ref_avanco, ref_acesso, responsavel, ok, erro, criado_em').order('id', { ascending: false }).limit(20),
@@ -93,6 +93,14 @@ export const restaurarConteudo = (passoId) => acao('impl_restaurar_conteudo', { 
 
 export const salvarAnalista = (id, nome, email, calendly) =>
   acao('impl_salvar_analista', { p_id: id ?? null, p_nome: nome, p_email: email, p_calendly: calendly })
+
+// Novo acesso (só admin): perfil 'admin' | 'analista' | 'cliente' (cliente precisa do hotel). Devolve o id.
+export async function criarAcesso({ nome, email, perfil, hotelId }) {
+  const { data, error } = await supabase.rpc('impl_criar_acesso', { p_nome: nome, p_email: email, p_perfil: perfil, p_hotel: hotelId || null })
+  if (error) throw new Error(error.message)
+  await recarregar()
+  return data
+}
 
 // Inscrição feita pela janela do Calendly (o Calendly avisa a página quando a pessoa conclui).
 export const registrarInscricao = (hotelId, treinoId) => acao('impl_registrar_inscricao', { p_hotel: hotelId, p_treino: treinoId })

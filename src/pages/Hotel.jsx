@@ -21,11 +21,11 @@ export default function Hotel({ estado, usuario, hotelId, onSimular }) {
       tentar(() => marcarReuniaoRealizada(hotel.id, seg.numero))
     }
   }
-  const editora = usuario.perfil === 'editora'
+  const admin = usuario.perfil === 'admin'
 
   return (
     <>
-      <a href={usuario.perfil === 'editora' ? '#/hoteis' : '#/'} className="voltar">← {usuario.perfil === 'editora' ? 'Hotéis' : 'Meus hotéis'}</a>
+      <a href="#/hoteis" className="voltar">← {admin ? 'Hotéis' : 'Meus hotéis'}</a>
       <header className="cabecalho">
         <div>
           <h1>{hotel.nome}</h1>
@@ -96,9 +96,9 @@ export default function Hotel({ estado, usuario, hotelId, onSimular }) {
         </div>
 
         <aside className="hotel-lado">
-          {editora && (
+          {admin && (
             <section className="cartao ferramentas">
-              <h2>Ferramentas da editora</h2>
+              <h2>Ferramentas do admin</h2>
               <button className="btn" onClick={() => onSimular(hotel.id)}>Ver como o cliente</button>
               {hotel.teste && (
                 <button className="btn fantasma" onClick={() => {
@@ -127,7 +127,7 @@ export default function Hotel({ estado, usuario, hotelId, onSimular }) {
               {usuarios.map((u) => (
                 <li key={u.id}>
                   <span><b>{u.nome}</b><br /><span className="muted pequeno">{u.email}</span></span>
-                  {editora && <BotaoConvite usuario={u} />}
+                  {admin && <BotaoConvite usuario={u} />}
                 </li>
               ))}
             </ul>

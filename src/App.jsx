@@ -12,6 +12,7 @@ import Editor from './pages/Editor.jsx'
 import Analistas from './pages/Analistas.jsx'
 import Inicio from './pages/Inicio.jsx'
 import Dashboard from './pages/Dashboard.jsx'
+import Acessos from './pages/Acessos.jsx'
 import { AlternarTema } from './tema.jsx'
 import { TutoriaisProduto, TutorialPasso } from './pages/Tutoriais.jsx'
 
@@ -25,16 +26,20 @@ const lerRota = () => {
 
 const MENU = {
   cliente: [{ rota: '', rotulo: 'Início' }, { rota: 'implantacao', rotulo: 'Minha implantação' }],
-  analista: [{ rota: '', rotulo: 'Meus hotéis' }],
-  editora: [{ rota: '', rotulo: 'Conteúdo' }, { rota: 'dashboard', rotulo: 'Dashboard' }, { rota: 'hoteis', rotulo: 'Hotéis' }, { rota: 'analistas', rotulo: 'Analistas' }],
+  analista: [{ rota: '', rotulo: 'Dashboard' }, { rota: 'hoteis', rotulo: 'Meus hotéis' }],
+  admin: [
+    { rota: '', rotulo: 'Conteúdo' }, { rota: 'dashboard', rotulo: 'Dashboard' }, { rota: 'hoteis', rotulo: 'Hotéis' },
+    { rota: 'analistas', rotulo: 'Analistas' }, { rota: 'acessos', rotulo: 'Acessos' },
+  ],
 }
 
 // Título da aba por tela: "Início · HSystem Academy", "Minha implantação · HSystem Academy"…
 function tituloDaAba(perfil, pagina) {
   const nome = perfil === 'cliente'
     ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'Minha implantação' : ['tutoriais', 'tutorial'].includes(pagina) ? 'Tutoriais' : 'Início')
-    : pagina === 'hoteis' || pagina === 'hotel' || (perfil === 'analista' && !pagina) ? (perfil === 'analista' ? 'Meus hotéis' : 'Hotéis')
-    : pagina === 'analistas' ? 'Analistas' : pagina === 'dashboard' ? 'Dashboard' : 'Conteúdo'
+    : pagina === 'hoteis' || pagina === 'hotel' ? (perfil === 'analista' ? 'Meus hotéis' : 'Hotéis')
+    : pagina === 'analistas' ? 'Analistas' : pagina === 'acessos' ? 'Acessos'
+    : pagina === 'dashboard' || (perfil === 'analista' && !pagina) ? 'Dashboard' : 'Conteúdo'
   return `${nome} · HSystem Academy`
 }
 
@@ -86,8 +91,8 @@ export default function App() {
   const eu = estado.usuarios.find((u) => u.email === emailSessao.toLowerCase())
   if (!eu) return <Aviso titulo="Acesso não liberado" texto={`O e-mail ${emailSessao} não está cadastrado na implantação. Fale com seu analista.`} onSair={sair} />
 
-  // A editora pode ver o sistema como o cliente de um hotel (para testar e dar suporte).
-  const hotelSimulado = eu.perfil === 'editora' && simulando && estado.hoteis.find((h) => h.id === simulando)
+  // O admin pode ver o sistema como o cliente de um hotel (para testar e dar suporte).
+  const hotelSimulado = eu.perfil === 'admin' && simulando && estado.hoteis.find((h) => h.id === simulando)
   const usuario = hotelSimulado ? { ...eu, perfil: 'cliente', hotelId: hotelSimulado.id } : eu
 
   const [pagina, param] = rota
@@ -104,12 +109,15 @@ export default function App() {
       : pagina === 'tutorial' ? <TutorialPasso estado={estado} passoId={param} />
       : <Inicio {...props} />
   } else if (usuario.perfil === 'analista') {
-    conteudo = pagina === 'hotel' ? <Hotel estado={estado} usuario={usuario} hotelId={param} /> : <Hoteis estado={estado} usuario={usuario} />
+    conteudo = pagina === 'hotel' ? <Hotel estado={estado} usuario={usuario} hotelId={param} />
+      : pagina === 'hoteis' ? <Hoteis estado={estado} usuario={usuario} />
+      : <Dashboard estado={estado} usuario={usuario} />
   } else {
     conteudo =
       pagina === 'hoteis' ? <Hoteis estado={estado} usuario={usuario} todos />
       : pagina === 'analistas' ? <Analistas estado={estado} />
-      : pagina === 'dashboard' ? <Dashboard estado={estado} />
+      : pagina === 'acessos' ? <Acessos estado={estado} />
+      : pagina === 'dashboard' ? <Dashboard estado={estado} usuario={usuario} />
       : pagina === 'hotel' ? <Hotel estado={estado} usuario={usuario} hotelId={param} onSimular={simular} />
       : <Editor estado={estado} passoId={pagina === 'passo' ? param : null} />
   }
@@ -117,7 +125,8 @@ export default function App() {
   const hotel = usuario.hotelId && estado.hoteis.find((h) => h.id === usuario.hotelId)
   const ativa = usuario.perfil === 'cliente'
     ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'implantacao' : '')
-    : pagina === 'hoteis' || (usuario.perfil === 'editora' && pagina === 'hotel') ? 'hoteis' : pagina === 'analistas' ? 'analistas' : pagina === 'dashboard' ? 'dashboard' : ''
+    : pagina === 'hoteis' || pagina === 'hotel' ? 'hoteis'
+    : ['analistas', 'acessos', 'dashboard'].includes(pagina) ? pagina : ''
 
   return (
     <div className="layout">
@@ -133,7 +142,7 @@ export default function App() {
           <img className="logo-simbolo" src="./simbolo.png" alt="HSystem Academy Clientes" />
         </a>
         <nav>
-          {MENU[usuario.perfil].map((m) => (
+          {(MENU[usuario.perfil] ?? []).map((m) => (
             <a key={m.rota} href={`#/${m.rota}`} className={ativa === m.rota ? 'ativa' : ''} aria-current={ativa === m.rota ? 'page' : undefined}>{m.rotulo}</a>
           ))}
         </nav>
@@ -141,7 +150,7 @@ export default function App() {
           <AlternarTema />
           <span>
             <b>{eu.nome}</b>
-            <small>{hotel ? hotel.nome : usuario.perfil === 'analista' ? 'Analista' : 'Editora'}</small>
+            <small>{hotel ? hotel.nome : usuario.perfil === 'analista' ? 'Analista' : 'Admin'}</small>
           </span>
           <button className="btn fantasma pequeno" onClick={sair}>Sair</button>
         </div>

@@ -1,5 +1,5 @@
 // Implantação híbrida: envia o convite de primeiro acesso para um usuário da tabela impl_usuarios.
-// Só a editora pode chamar. Se a pessoa já tem login no Supabase (ex.: equipe HSystem), envia o link
+// Só o admin pode chamar. Se a pessoa já tem login no Supabase (ex.: equipe HSystem), envia o link
 // de definir senha em vez do convite. Publicar com verify_jwt ligado.
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     if (!user?.email) return resposta({ erro: 'Não autenticado' }, 401)
 
     const { data: eu } = await admin.from('impl_usuarios').select('perfil').eq('email', user.email.toLowerCase()).maybeSingle()
-    if (eu?.perfil !== 'editora') return resposta({ erro: 'Só a editora pode enviar convites' }, 403)
+    if (eu?.perfil !== 'admin') return resposta({ erro: 'Só o admin pode enviar convites' }, 403)
 
     const { usuario_id, redirect_to } = await req.json()
     const { data: alvo } = await admin.from('impl_usuarios').select('id, email, nome').eq('id', usuario_id).maybeSingle()

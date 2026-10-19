@@ -1,6 +1,6 @@
 // Implantação híbrida: sincroniza hotéis, contratos e contatos a partir do Sensedata (API v2).
 //
-// Quem pode chamar: a editora (botão "Sincronizar agora") ou o agendamento do banco (pg_cron), que manda
+// Quem pode chamar: o admin (botão "Sincronizar agora") ou o agendamento do banco (pg_cron), que manda
 // a chave interna guardada em impl_segredos no cabeçalho x-sync-chave. Publicar com verify_jwt desligado:
 // a própria função confere uma das duas formas de acesso.
 //
@@ -8,7 +8,7 @@
 // "Onboarding - Implantação Híbrida" disparado (procurado pelo nome, sem diferenciar acento/maiúscula).
 // Para cada um: o cliente vira hotel; contratos (campo Plano e fim da vigência) e contatos ativos com e-mail são
 // atualizados; o CS do cliente vira o analista do hotel quando já existe um analista com o mesmo e-mail (senão fica
-// como pendência para a editora cadastrar).
+// como pendência para o admin cadastrar).
 //
 // Corpo { modo: 'parados' }: cria no Sensedata uma tarefa para o CS de cada hotel parado há mais de 7 dias
 // (regra em impl_hoteis_parados, supabase/05_parados.sql). Roda todo dia útil às 9h e pelo botão do painel.
@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
     const { data: { user } } = await comoQuem.auth.getUser()
     if (!user?.email) return resposta({ erro: 'Não autenticado' }, 401)
     const { data: eu } = await admin.from('impl_usuarios').select('perfil').eq('email', user.email.toLowerCase()).maybeSingle()
-    if (eu?.perfil !== 'editora') return resposta({ erro: 'Só a editora pode sincronizar' }, 403)
+    if (eu?.perfil !== 'admin') return resposta({ erro: 'Só o admin pode sincronizar' }, 403)
     origem = 'manual'
   }
   const corpo = await req.json().catch(() => ({}))
@@ -197,7 +197,7 @@ Deno.serve(async (req) => {
     // Clientes com o campo preenchido
     const comCampo = await todos(token, '/customers', 'customers', { [`custom_fields:${nomeCampo}:empty`]: false })
     const clientes = comCampo.filter((c) => preenchido(c.custom_fields?.[nomeCampo]?.value) && comPlaybook.has(String(c.id)))
-    // Quem tem o playbook mas ficou de fora (para a editora entender no histórico)
+    // Quem tem o playbook mas ficou de fora (para o admin entender no histórico)
     const dentro = new Set(clientes.map((c) => String(c.id)))
     for (const id of [...comPlaybook].filter((id) => !dentro.has(id)).slice(0, 20)) {
       try {
