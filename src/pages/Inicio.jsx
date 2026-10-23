@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { dadosDoHotel, nomeReuniao, JanelaCalendly, saudacao, ProgressoImplantacao, Selo, fmtData, fmtDataHora, tentar } from '../comum.jsx'
+import { dadosDoHotel, nomeReuniao, JanelaCalendly, saudacao, ProgressoImplantacao, Selo, fmtData, fmtDataHora, tentar, useSomenteLeitura, AVISO_LEITURA } from '../comum.jsx'
 import { registrarInscricao } from '../dados.js'
 import { CATALOGO, TREINAMENTOS_GRUPO, ORDEM_TUTORIAIS, IMAGEM_TUTORIAL, corProduto, nomeProduto } from '../trilhas.js'
 
@@ -28,14 +28,16 @@ function proximaData(sessao) {
 // Inscrição feita pela janela do Calendly nos últimos 7 dias: mostra "Inscrito ✓".
 const DIAS_INSCRICAO_VALE = 7
 function BotaoInscricao({ treino, inscricao, onAbrir }) {
+  const leitura = useSomenteLeitura()
+  const dica = leitura ? AVISO_LEITURA : undefined
   const recente = inscricao && Date.now() - new Date(inscricao.em).getTime() < DIAS_INSCRICAO_VALE * 864e5
   if (!recente) {
-    return <button className="btn primario" onClick={onAbrir} aria-label={`Fazer inscrição no treinamento em grupo do ${treino.titulo}`}>Fazer inscrição</button>
+    return <button className="btn primario" onClick={onAbrir} disabled={leitura} title={dica} aria-label={`Fazer inscrição no treinamento em grupo do ${treino.titulo}`}>Fazer inscrição</button>
   }
   return (
     <div className="treino-inscrito">
       <span className="selo concluido">Inscrito ✓ em {fmtData(inscricao.em)}</span>
-      <button className="btn" onClick={onAbrir} aria-label={`Ver horários do treinamento em grupo do ${treino.titulo}`}>Ver horários</button>
+      <button className="btn" onClick={onAbrir} disabled={leitura} title={dica} aria-label={`Ver horários do treinamento em grupo do ${treino.titulo}`}>Ver horários</button>
     </div>
   )
 }

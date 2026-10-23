@@ -96,11 +96,11 @@ export default function Hotel({ estado, usuario, hotelId, onSimular }) {
         </div>
 
         <aside className="hotel-lado">
-          {admin && (
+          {onSimular && (
             <section className="cartao ferramentas">
-              <h2>Ferramentas do admin</h2>
-              <button className="btn" onClick={() => onSimular(hotel.id)}>Ver como o cliente</button>
-              {hotel.teste && (
+              <h2>Ferramentas</h2>
+              <button className="btn" onClick={() => onSimular(hotel.id)}>Ver como o cliente vê</button>
+              {admin && hotel.teste && (
                 <button className="btn fantasma" onClick={() => {
                   if (confirm(`Apagar todo o progresso de ${hotel.nome}? Só hotéis de teste podem ser zerados.`)) tentar(() => zerarHotelTeste(hotel.id))
                 }}>Zerar progresso (hotel de teste)</button>

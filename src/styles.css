@@ -570,3 +570,20 @@ html[data-tema="escuro"] .anel-progresso .anel-valor { stroke: color-mix(in srgb
 .tabela-acessos tbody tr { cursor: default; }
 .selo.perfil-admin { background: var(--accent-bg); color: var(--accent-forte); }
 .selo.perfil-analista { background: var(--ok-bg); color: var(--ok); }
+
+/* ---- Visão do hotel (time interno vendo como o cliente) ---- */
+.faixa-visao { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 8px 16px; font-size: 14px; background: var(--accent-bg); color: var(--text); border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+.faixa-visao b { color: var(--accent-forte); }
+.faixa-visao-troca { flex-direction: row; }
+.faixa-visao-troca select { min-height: 40px; padding: 6px 10px; width: auto; max-width: 260px; }
+.faixa-visao .btn.pequeno { min-height: 40px; }
+.busca-visao { flex: 1 1 320px; max-width: 480px; }
+.visao-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.visao-item { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; text-align: left; font: inherit; color: var(--text); cursor: pointer; border: 1px solid var(--border); padding: 16px 20px; }
+.visao-item:hover { border-color: var(--accent); }
+.visao-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.visao-item-nome { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.visao-item-nome .selo { margin-left: 8px; vertical-align: middle; }
+.visao-item-status { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.visao-item-acao { color: var(--accent); font-weight: 600; font-size: 14px; }
+.aviso-leitura { color: var(--accent-forte); background: var(--accent-bg); border-radius: 8px; padding: 8px 10px; margin: 0; }

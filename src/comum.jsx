@@ -1,7 +1,12 @@
 // Peças usadas em várias telas: datas, vídeo do YouTube, texto, barra de progresso e ícones de status.
-import { useEffect, useRef, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { montarJornada, calcularProgresso } from './regras.js'
 import { CATALOGO } from './trilhas.js'
+
+// Visão do hotel (time interno vendo como o cliente): só visualização, as ações do cliente ficam desativadas.
+export const SomenteLeitura = createContext(false)
+export const useSomenteLeitura = () => useContext(SomenteLeitura)
+export const AVISO_LEITURA = 'Na visão do hotel é só visualização: esta ação fica com o cliente.'
 
 // Executa uma ação no banco e avisa se der erro (sem rede, sem permissão…). Devolve true se deu certo.
 export async function tentar(fn) {

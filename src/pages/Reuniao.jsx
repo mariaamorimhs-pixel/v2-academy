@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { dadosDoHotel, fmtDataHora, nomeReuniao, listaMarcas, tentar } from '../comum.jsx'
+import { dadosDoHotel, fmtDataHora, nomeReuniao, listaMarcas, tentar, useSomenteLeitura, AVISO_LEITURA } from '../comum.jsx'
 import { nomeProduto } from '../trilhas.js'
 import { agendarReuniao } from '../dados.js'
 import { Voltar } from './Produto.jsx'
@@ -10,17 +10,19 @@ export default function Reuniao({ estado, hotelId, numero }) {
   const { jornada, progresso, prog, analista } = dadosDoHotel(estado, hotelId)
   const seg = jornada.find((s) => s.tipo === 'reuniao' && s.numero === numero)
   const [reagendar, setReagendar] = useState(false)
+  const leitura = useSomenteLeitura()
 
   // O Calendly avisa a página quando a pessoa conclui o agendamento no widget embutido.
   useEffect(() => {
     const aoReceber = (e) => {
+      if (leitura) return
       if (e.origin === 'https://calendly.com' && e.data?.event === 'calendly.event_scheduled') {
         tentar(() => agendarReuniao(hotelId, numero, null)).then((ok) => ok && setReagendar(false))
       }
     }
     window.addEventListener('message', aoReceber)
     return () => window.removeEventListener('message', aoReceber)
-  }, [hotelId, numero])
+  }, [hotelId, numero, leitura])
 
   if (!seg) return <Voltar texto="Reunião não encontrada." />
   const st = prog.status[seg.id]
@@ -46,7 +48,13 @@ export default function Reuniao({ estado, hotelId, numero }) {
         <div className="cartao">
           <h2>{r.agendadaPara ? `Marcada para ${fmtDataHora(r.agendadaPara)}` : 'Reunião marcada pelo Calendly'}</h2>
           <p className="muted">Você recebe o convite por e-mail. Assim que {analista?.nome.split(' ')[0] ?? 'o analista'} confirmar que a reunião aconteceu, o próximo módulo é liberado.</p>
-          <button className="btn fantasma" onClick={() => setReagendar(true)}>Reagendar</button>
+          <button className="btn fantasma" onClick={() => setReagendar(true)} disabled={leitura} title={leitura ? AVISO_LEITURA : undefined}>Reagendar</button>
+        </div>
+      ) : leitura ? (
+        <div className="cartao">
+          <h2>Escolha um horário</h2>
+          <p className="muted">Aqui o cliente vê a agenda {analista?.calendly ? 'do Calendly ' : ''}de {analista?.nome ?? 'seu analista'} para marcar a reunião.</p>
+          <p className="aviso-leitura pequeno">{AVISO_LEITURA}</p>
         </div>
       ) : (
         <Agendar analista={analista} onAgendar={async (quando) => { if (await tentar(() => agendarReuniao(hotelId, numero, quando))) setReagendar(false) }} />

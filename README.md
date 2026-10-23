@@ -24,6 +24,8 @@ Escopo completo: documento "Escopo — Implantação Híbrida HSystem" (Claude D
 - **Admin**: acesso a tudo. Na aba **Acessos** cria acessos de admin, analista ou usuário de um hotel
   (função `impl_criar_acesso`) e envia o convite por e-mail.
 - **Analista**: Dashboard e "Meus hotéis", só com os hotéis em que ele é o analista (regras do banco).
+- **Visão do hotel** (admin e analista): busca um hotel e mostra o sistema como o cliente vê, só para olhar
+  (botões de concluir, agendar e se inscrever desativados). O analista só encontra os hotéis dele.
 - **Cliente**: a implantação do próprio hotel.
 
 ## Integração com o Sensedata

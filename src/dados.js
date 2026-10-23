@@ -78,11 +78,20 @@ async function acao(nome, args) {
 
 // ---- ações ----
 
-export const concluirPasso = (hotelId, passoId) => acao('impl_concluir_passo', { p_hotel: hotelId, p_passo: passoId })
+// Na visão do hotel (time interno vendo como o cliente) as ações do cliente ficam bloqueadas também aqui,
+// além dos botões desativados na tela.
+let somenteLeitura = false
+export const definirSomenteLeitura = (v) => { somenteLeitura = v }
+const acaoDoCliente = (nome, args) => {
+  if (somenteLeitura) return Promise.reject(new Error('na visão do hotel é só visualização.'))
+  return acao(nome, args)
+}
+
+export const concluirPasso = (hotelId, passoId) => acaoDoCliente('impl_concluir_passo', { p_hotel: hotelId, p_passo: passoId })
 
 // `quando` = data/hora escolhida; null quando veio do Calendly sem horário conhecido.
 export const agendarReuniao = (hotelId, numero, quando) =>
-  acao('impl_agendar_reuniao', { p_hotel: hotelId, p_numero: numero, p_quando: quando })
+  acaoDoCliente('impl_agendar_reuniao', { p_hotel: hotelId, p_numero: numero, p_quando: quando })
 
 export const marcarReuniaoRealizada = (hotelId, numero) => acao('impl_reuniao_realizada', { p_hotel: hotelId, p_numero: numero })
 
@@ -103,7 +112,7 @@ export async function criarAcesso({ nome, email, perfil, hotelId }) {
 }
 
 // Inscrição feita pela janela do Calendly (o Calendly avisa a página quando a pessoa conclui).
-export const registrarInscricao = (hotelId, treinoId) => acao('impl_registrar_inscricao', { p_hotel: hotelId, p_treino: treinoId })
+export const registrarInscricao = (hotelId, treinoId) => acaoDoCliente('impl_registrar_inscricao', { p_hotel: hotelId, p_treino: treinoId })
 
 // Sincronização com o Sensedata (função impl-sync-sensedata).
 // modo 'parados' cria as tarefas no Sensedata para os clientes parados.

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase, LINK_DE_SENHA } from './supabase.js'
-import { useEstado, recarregar, limparDados } from './dados.js'
+import { useEstado, recarregar, limparDados, definirSomenteLeitura } from './dados.js'
 import Login from './pages/Login.jsx'
 import Jornada from './pages/Jornada.jsx'
 import Produto from './pages/Produto.jsx'
@@ -13,6 +13,8 @@ import Analistas from './pages/Analistas.jsx'
 import Inicio from './pages/Inicio.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import Acessos from './pages/Acessos.jsx'
+import VisaoHotel, { FaixaVisao } from './pages/VisaoHotel.jsx'
+import { SomenteLeitura } from './comum.jsx'
 import { AlternarTema } from './tema.jsx'
 import { TutoriaisProduto, TutorialPasso } from './pages/Tutoriais.jsx'
 
@@ -26,10 +28,10 @@ const lerRota = () => {
 
 const MENU = {
   cliente: [{ rota: '', rotulo: 'Início' }, { rota: 'implantacao', rotulo: 'Minha implantação' }],
-  analista: [{ rota: '', rotulo: 'Dashboard' }, { rota: 'hoteis', rotulo: 'Meus hotéis' }],
+  analista: [{ rota: '', rotulo: 'Dashboard' }, { rota: 'hoteis', rotulo: 'Meus hotéis' }, { rota: 'visao', rotulo: 'Visão do hotel' }],
   admin: [
     { rota: '', rotulo: 'Conteúdo' }, { rota: 'dashboard', rotulo: 'Dashboard' }, { rota: 'hoteis', rotulo: 'Hotéis' },
-    { rota: 'analistas', rotulo: 'Analistas' }, { rota: 'acessos', rotulo: 'Acessos' },
+    { rota: 'visao', rotulo: 'Visão do hotel' }, { rota: 'analistas', rotulo: 'Analistas' }, { rota: 'acessos', rotulo: 'Acessos' },
   ],
 }
 
@@ -38,7 +40,7 @@ function tituloDaAba(perfil, pagina) {
   const nome = perfil === 'cliente'
     ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'Minha implantação' : ['tutoriais', 'tutorial'].includes(pagina) ? 'Tutoriais' : 'Início')
     : pagina === 'hoteis' || pagina === 'hotel' ? (perfil === 'analista' ? 'Meus hotéis' : 'Hotéis')
-    : pagina === 'analistas' ? 'Analistas' : pagina === 'acessos' ? 'Acessos'
+    : pagina === 'analistas' ? 'Analistas' : pagina === 'acessos' ? 'Acessos' : pagina === 'visao' ? 'Visão do hotel'
     : pagina === 'dashboard' || (perfil === 'analista' && !pagina) ? 'Dashboard' : 'Conteúdo'
   return `${nome} · HSystem Academy`
 }
@@ -73,7 +75,7 @@ export default function App() {
     if (hotelId) sessionStorage.setItem(SIMULACAO, hotelId)
     else sessionStorage.removeItem(SIMULACAO)
     setSimulando(hotelId)
-    window.location.hash = hotelId ? '/' : '/hoteis'
+    window.location.hash = hotelId ? '/' : '/visao'
   }
   async function sair() {
     sessionStorage.removeItem(SIMULACAO)
@@ -91,8 +93,10 @@ export default function App() {
   const eu = estado.usuarios.find((u) => u.email === emailSessao.toLowerCase())
   if (!eu) return <Aviso titulo="Acesso não liberado" texto={`O e-mail ${emailSessao} não está cadastrado na implantação. Fale com seu analista.`} onSair={sair} />
 
-  // O admin pode ver o sistema como o cliente de um hotel (para testar e dar suporte).
-  const hotelSimulado = eu.perfil === 'admin' && simulando && estado.hoteis.find((h) => h.id === simulando)
+  // Visão do hotel: admin e analista veem o sistema como o cliente de um hotel, só para olhar
+  // (o analista só encontra os hotéis dele). As ações do cliente ficam desativadas.
+  const hotelSimulado = ['admin', 'analista'].includes(eu.perfil) && simulando && estado.hoteis.find((h) => h.id === simulando)
+  definirSomenteLeitura(!!hotelSimulado)
   const usuario = hotelSimulado ? { ...eu, perfil: 'cliente', hotelId: hotelSimulado.id } : eu
 
   const [pagina, param] = rota
@@ -109,7 +113,8 @@ export default function App() {
       : pagina === 'tutorial' ? <TutorialPasso estado={estado} passoId={param} />
       : <Inicio {...props} />
   } else if (usuario.perfil === 'analista') {
-    conteudo = pagina === 'hotel' ? <Hotel estado={estado} usuario={usuario} hotelId={param} />
+    conteudo = pagina === 'hotel' ? <Hotel estado={estado} usuario={usuario} hotelId={param} onSimular={simular} />
+      : pagina === 'visao' ? <VisaoHotel estado={estado} onEscolher={simular} />
       : pagina === 'hoteis' ? <Hoteis estado={estado} usuario={usuario} />
       : <Dashboard estado={estado} usuario={usuario} />
   } else {
@@ -117,6 +122,7 @@ export default function App() {
       pagina === 'hoteis' ? <Hoteis estado={estado} usuario={usuario} todos />
       : pagina === 'analistas' ? <Analistas estado={estado} />
       : pagina === 'acessos' ? <Acessos estado={estado} />
+      : pagina === 'visao' ? <VisaoHotel estado={estado} onEscolher={simular} />
       : pagina === 'dashboard' ? <Dashboard estado={estado} usuario={usuario} />
       : pagina === 'hotel' ? <Hotel estado={estado} usuario={usuario} hotelId={param} onSimular={simular} />
       : <Editor estado={estado} passoId={pagina === 'passo' ? param : null} />
@@ -126,16 +132,11 @@ export default function App() {
   const ativa = usuario.perfil === 'cliente'
     ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'implantacao' : '')
     : pagina === 'hoteis' || pagina === 'hotel' ? 'hoteis'
-    : ['analistas', 'acessos', 'dashboard'].includes(pagina) ? pagina : ''
+    : ['analistas', 'acessos', 'dashboard', 'visao'].includes(pagina) ? pagina : ''
 
   return (
     <div className="layout">
-      {hotelSimulado && (
-        <div className="faixa-demo">
-          <span>Você está vendo como o cliente de <b>{hotelSimulado.nome}</b>. O que fizer aqui vale para o hotel.</span>
-          <button className="link" onClick={() => simular(null)}>Sair da simulação</button>
-        </div>
-      )}
+      {hotelSimulado && <FaixaVisao estado={estado} hotel={hotelSimulado} onEscolher={simular} />}
       <header className="topo">
         <a href="#" className="marca-sistema">
           <img className="logo-inteiro" src="./logo.png" alt="HSystem Academy Clientes" />
@@ -155,7 +156,7 @@ export default function App() {
           <button className="btn fantasma pequeno" onClick={sair}>Sair</button>
         </div>
       </header>
-      <main className="pagina">{conteudo}</main>
+      <main className="pagina"><SomenteLeitura.Provider value={!!hotelSimulado}>{conteudo}</SomenteLeitura.Provider></main>
     </div>
   )
 }

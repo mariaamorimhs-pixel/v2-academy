@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { dadosDoHotel, Video, Texto, fmtDataHora, nomeReuniao, tentar, JanelaCalendly } from '../comum.jsx'
+import { dadosDoHotel, Video, Texto, fmtDataHora, nomeReuniao, tentar, JanelaCalendly, useSomenteLeitura, AVISO_LEITURA } from '../comum.jsx'
 import { proximaUnidade, proximaDisponivel } from '../regras.js'
 import { treinoDoProduto } from '../trilhas.js'
 import { concluirPasso } from '../dados.js'
@@ -50,6 +50,7 @@ export default function Passo({ estado, hotelId, passoId }) {
   const rotuloDestino = destino && (destino.tipo === 'passo' ? destino.passo.titulo : nomeReuniao(destino.reuniao))
   const feito = progresso.passos?.[u.id]
   const treino = treinoDoProduto(seg.codigo)
+  const leitura = useSomenteLeitura()
   const linkTrilha = `#/produto/${seg.codigo}`
 
   async function concluir() {
@@ -61,7 +62,7 @@ export default function Passo({ estado, hotelId, passoId }) {
 
   const atalhos = (
     <>
-      {treino && <button className="btn" onClick={() => setCalendly(treino)}>Ver horários do treinamento ao vivo de {seg.nome}</button>}
+      {treino && <button className="btn" onClick={() => setCalendly(treino)} disabled={leitura} title={leitura ? AVISO_LEITURA : undefined}>Ver horários do treinamento ao vivo de {seg.nome}</button>}
       <a className="btn fantasma" href={linkTrilha}>Voltar para a trilha</a>
     </>
   )
@@ -86,7 +87,8 @@ export default function Passo({ estado, hotelId, passoId }) {
           ) : (
             <>
               <p>Assistiu ao vídeo e fez o que ele mostra no sistema?</p>
-              <button className="btn primario" onClick={concluir} disabled={salvando}>{salvando ? 'Salvando…' : 'Concluí este passo'}</button>
+              <button className="btn primario" onClick={concluir} disabled={salvando || leitura}>{salvando ? 'Salvando…' : 'Concluí este passo'}</button>
+              {leitura && <p className="aviso-leitura pequeno">{AVISO_LEITURA}</p>}
               <p className="muted pequeno">A conclusão vale para todos os usuários do hotel.{rotuloProx && <> Depois vem: {rotuloProx}.</>}</p>
             </>
           )}
