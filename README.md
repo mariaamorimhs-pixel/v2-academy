@@ -50,3 +50,9 @@ npm install
 npm run dev
 ```
 Abre em http://localhost:5181. Precisa do arquivo `.env` com `VITE_SUPABASE_URL` e `VITE_SUPABASE_KEY`.
+
+## Publicação
+- **Railway** (principal): build `npm run build`, start `serve dist`. Variáveis VITE_SUPABASE_URL e VITE_SUPABASE_KEY.
+- **GitHub Pages** (alternativa): `.github/workflows/pages.yml` publica a cada push na main em
+  https://mariaamorimhs-pixel.github.io/v2-academy/ (Settings → Pages → Source: GitHub Actions). Esse endereço
+  precisa estar nas Redirect URLs do Supabase para os convites e o "esqueci minha senha" funcionarem.
