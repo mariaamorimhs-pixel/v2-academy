@@ -32,6 +32,8 @@ Escopo completo: documento "Escopo — Implantação Híbrida HSystem" (Claude D
 - Admin cria em **Pesquisas**: título, texto, perguntas (texto curto/longo, múltipla escolha de uma ou várias opções),
   endereço e para onde levar depois de enviar. Abrem sem login em `#/pesquisa/<endereço>`; respostas anônimas
   (parâmetros do link como `utm_source` são guardados). Respostas na tela e em planilha CSV.
+- Cada pesquisa pode ter logo próprio (`supabase/08_logo_pesquisa.sql`, bucket público `pesquisas` do Storage, até 2 MB);
+  sem logo, a página mostra o do HSystem Academy.
 
 ## Integração com o Sensedata
 - Função `impl-sync-sensedata`: só entram clientes com o playbook **Onboarding - Implantação Híbrida** e o campo

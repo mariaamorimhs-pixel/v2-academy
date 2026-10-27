@@ -21,7 +21,7 @@ export default function PesquisaPublica({ slug }) {
 
   if (pesquisa === undefined) return <div className="centro muted">Carregando…</div>
   if (!pesquisa) return <Moldura><h1>Pesquisa não encontrada</h1><p className="muted">Este link não está disponível. Confira o endereço com quem te enviou.</p></Moldura>
-  if (enviada) return <Moldura><h1>Obrigado!</h1><p className="muted">Suas respostas foram enviadas.</p></Moldura>
+  if (enviada) return <Moldura logo={pesquisa.logo_url}><h1>Obrigado!</h1><p className="muted">Suas respostas foram enviadas.</p></Moldura>
 
   const definir = (id, valor) => { setRespostas((r) => ({ ...r, [id]: valor })); setErros((e) => ({ ...e, [id]: null })) }
   const alternar = (id, opcao) => {
@@ -54,7 +54,7 @@ export default function PesquisaPublica({ slug }) {
   }
 
   return (
-    <Moldura>
+    <Moldura logo={pesquisa.logo_url}>
       <h1>{pesquisa.titulo}</h1>
       {pesquisa.descricao && <p className="pesquisa-descricao">{pesquisa.descricao}</p>}
       <form className="pesquisa-form" onSubmit={enviar} noValidate>
@@ -104,11 +104,14 @@ function Pergunta({ p, numero, valor, erro, onTexto, onUma, onVarias }) {
   )
 }
 
-function Moldura({ children }) {
+// Logo da pesquisa (enviado no editor) ou, sem ele, o do HSystem Academy.
+function Moldura({ logo, children }) {
   return (
     <div className="pesquisa-pagina">
       <main className="pesquisa-cartao cartao">
-        <div className="login-marca pesquisa-logo"><img src="./logo.png" alt="HSystem" /></div>
+        {logo
+          ? <div className="pesquisa-logo pesquisa-logo-proprio"><img src={logo} alt="Logo" /></div>
+          : <div className="login-marca pesquisa-logo"><img src="./logo.png" alt="HSystem" /></div>}
         {children}
       </main>
     </div>

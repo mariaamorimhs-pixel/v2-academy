@@ -93,9 +93,9 @@ function ListaPesquisas({ lista }) {
 
 export function EditorPesquisa({ pesquisa, onSalvo }) {
   const [form, setForm] = useState(() => pesquisa
-    ? { ...pesquisa, descricao: pesquisa.descricao ?? '', redirecionar_url: pesquisa.redirecionar_url ?? '',
+    ? { ...pesquisa, descricao: pesquisa.descricao ?? '', redirecionar_url: pesquisa.redirecionar_url ?? '', logo_url: pesquisa.logo_url ?? '',
         perguntas: pesquisa.perguntas.map((p) => ({ ...p, opcoesTexto: (p.opcoes ?? []).join('\n') })) }
-    : { titulo: '', slug: '', descricao: '', texto_botao: 'Enviar respostas', redirecionar_url: '', ativa: true,
+    : { titulo: '', slug: '', descricao: '', texto_botao: 'Enviar respostas', redirecionar_url: '', logo_url: '', ativa: true,
         perguntas: [{ id: novoId(), tipo: 'texto', titulo: '', obrigatoria: true, opcoesTexto: '' }] })
   const [slugManual, setSlugManual] = useState(!!pesquisa)
   const [salvando, setSalvando] = useState(false)
@@ -136,6 +136,7 @@ export function EditorPesquisa({ pesquisa, onSalvo }) {
       const { data, error } = await supabase.rpc('impl_salvar_pesquisa', {
         p_id: pesquisa?.id ?? null, p_slug: form.slug, p_titulo: form.titulo, p_descricao: form.descricao, p_perguntas: perguntas,
         p_texto_botao: form.texto_botao, p_redirecionar_url: form.redirecionar_url, p_ativa: form.ativa,
+        p_logo_url: form.logo_url || null,
       })
       if (error) throw new Error(error.message)
       novoIdPesquisa = data
@@ -167,6 +168,7 @@ export function EditorPesquisa({ pesquisa, onSalvo }) {
       <form className="editor-pesquisa" onSubmit={salvar}>
         <section className="cartao editor-pesquisa-bloco">
           <h2>Página</h2>
+          <LogoPesquisa url={form.logo_url} onMudar={(logo_url) => setForm((f) => ({ ...f, logo_url }))} />
           <label>Título<input value={form.titulo} onChange={mudarTitulo} placeholder="Ex.: Pesquisa de satisfação da implantação" /></label>
           <label>Texto de apresentação (opcional)<textarea rows={3} value={form.descricao} onChange={campo('descricao')} placeholder="Aparece embaixo do título." /></label>
           <div className="linha-form">
@@ -229,6 +231,46 @@ export function EditorPesquisa({ pesquisa, onSalvo }) {
         </div>
       </form>
     </>
+  )
+}
+
+// Logo da página pública: envia a imagem para o Storage (bucket "pesquisas") e guarda o endereço público.
+const TIPOS_LOGO = ['image/png', 'image/jpeg', 'image/webp']
+function LogoPesquisa({ url, onMudar }) {
+  const [enviando, setEnviando] = useState(false)
+  async function escolher(e) {
+    const arquivo = e.target.files?.[0]
+    e.target.value = ''
+    if (!arquivo) return
+    if (!TIPOS_LOGO.includes(arquivo.type)) { alert('Use uma imagem PNG, JPG ou WEBP.'); return }
+    if (arquivo.size > 2 * 1024 * 1024) { alert('A imagem precisa ter até 2 MB.'); return }
+    setEnviando(true)
+    await tentar(async () => {
+      const ext = arquivo.type.split('/')[1].replace('jpeg', 'jpg')
+      const caminho = `logos/${Date.now()}-${novoId()}.${ext}`
+      const { error } = await supabase.storage.from('pesquisas').upload(caminho, arquivo, { contentType: arquivo.type, cacheControl: '31536000' })
+      if (error) throw new Error(error.message)
+      onMudar(supabase.storage.from('pesquisas').getPublicUrl(caminho).data.publicUrl)
+    })
+    setEnviando(false)
+  }
+  return (
+    <div className="logo-pesquisa">
+      <span className="logo-pesquisa-rotulo">Logo da página</span>
+      <div className="logo-pesquisa-linha">
+        <div className="logo-pesquisa-previa">
+          {url ? <img src={url} alt="Logo escolhido" /> : <div className="login-marca"><img src="./logo.png" alt="Logo padrão do HSystem Academy" /></div>}
+        </div>
+        <div className="logo-pesquisa-acoes">
+          <label className="btn pequeno logo-pesquisa-botao">
+            {enviando ? 'Enviando…' : url ? 'Trocar logo' : 'Enviar logo'}
+            <input type="file" accept={TIPOS_LOGO.join(',')} onChange={escolher} disabled={enviando} className="sr-only" />
+          </label>
+          {url && <button type="button" className="btn pequeno fantasma" onClick={() => onMudar('')}>Usar o logo padrão</button>}
+          <span className="muted pequeno">{url ? 'Logo próprio desta pesquisa.' : 'Usando o logo padrão do HSystem Academy.'} PNG, JPG ou WEBP, até 2 MB. Vale depois de salvar.</span>
+        </div>
+      </div>
+    </div>
   )
 }
 
