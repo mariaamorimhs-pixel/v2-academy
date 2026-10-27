@@ -14,6 +14,8 @@ import Inicio from './pages/Inicio.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import Acessos from './pages/Acessos.jsx'
 import VisaoHotel, { FaixaVisao } from './pages/VisaoHotel.jsx'
+import Pesquisas from './pages/Pesquisas.jsx'
+import PesquisaPublica from './pages/PesquisaPublica.jsx'
 import { SomenteLeitura } from './comum.jsx'
 import { AlternarTema } from './tema.jsx'
 import { TutoriaisProduto, TutorialPasso } from './pages/Tutoriais.jsx'
@@ -23,6 +25,7 @@ const SIMULACAO = 'implantacao-hibrida-simulando'
 // Rotas por hash: #/produto/HBOOK, #/passo/hbook-2-1, #/hotel/<id>…
 const lerRota = () => {
   const h = window.location.hash.replace(/^#\/?/, '')
+  if (h.startsWith('pesquisa/')) return h.split('?')[0].split('/').filter(Boolean) // aceita #/pesquisa/x?utm_source=…
   return h.includes('=') ? [] : h.split('/').filter(Boolean) // ignora o retorno dos links do Supabase (#access_token=…)
 }
 
@@ -32,6 +35,7 @@ const MENU = {
   admin: [
     { rota: '', rotulo: 'Conteúdo' }, { rota: 'dashboard', rotulo: 'Dashboard' }, { rota: 'hoteis', rotulo: 'Hotéis' },
     { rota: 'visao', rotulo: 'Visão do hotel' }, { rota: 'analistas', rotulo: 'Analistas' }, { rota: 'acessos', rotulo: 'Acessos' },
+    { rota: 'pesquisas', rotulo: 'Pesquisas' },
   ],
 }
 
@@ -40,7 +44,7 @@ function tituloDaAba(perfil, pagina) {
   const nome = perfil === 'cliente'
     ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'Minha implantação' : ['tutoriais', 'tutorial'].includes(pagina) ? 'Tutoriais' : 'Início')
     : pagina === 'hoteis' || pagina === 'hotel' ? (perfil === 'analista' ? 'Meus hotéis' : 'Hotéis')
-    : pagina === 'analistas' ? 'Analistas' : pagina === 'acessos' ? 'Acessos' : pagina === 'visao' ? 'Visão do hotel'
+    : pagina === 'analistas' ? 'Analistas' : pagina === 'acessos' ? 'Acessos' : pagina === 'visao' ? 'Visão do hotel' : pagina === 'pesquisas' ? 'Pesquisas'
     : pagina === 'dashboard' || (perfil === 'analista' && !pagina) ? 'Dashboard' : 'Conteúdo'
   return `${nome} · HSystem Academy`
 }
@@ -84,6 +88,9 @@ export default function App() {
     window.location.hash = ''
   }
 
+  // Pesquisa pública: abre sem login (#/pesquisa/<endereço>).
+  if (rota[0] === 'pesquisa' && rota[1]) return <PesquisaPublica slug={rota[1]} />
+
   if (sessao === undefined) return <div className="centro muted">Carregando…</div>
   if (!sessao) return <Login />
   if (definirSenha) return <Login modo="nova-senha" onSenhaDefinida={() => { setDefinirSenha(false); window.location.hash = '' }} />
@@ -122,6 +129,7 @@ export default function App() {
       pagina === 'hoteis' ? <Hoteis estado={estado} usuario={usuario} todos />
       : pagina === 'analistas' ? <Analistas estado={estado} />
       : pagina === 'acessos' ? <Acessos estado={estado} />
+      : pagina === 'pesquisas' ? <Pesquisas rota={rota} />
       : pagina === 'visao' ? <VisaoHotel estado={estado} onEscolher={simular} />
       : pagina === 'dashboard' ? <Dashboard estado={estado} usuario={usuario} />
       : pagina === 'hotel' ? <Hotel estado={estado} usuario={usuario} hotelId={param} onSimular={simular} />
@@ -132,7 +140,7 @@ export default function App() {
   const ativa = usuario.perfil === 'cliente'
     ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'implantacao' : '')
     : pagina === 'hoteis' || pagina === 'hotel' ? 'hoteis'
-    : ['analistas', 'acessos', 'dashboard', 'visao'].includes(pagina) ? pagina : ''
+    : ['analistas', 'acessos', 'dashboard', 'visao', 'pesquisas'].includes(pagina) ? pagina : ''
 
   return (
     <div className="layout">

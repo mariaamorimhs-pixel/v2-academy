@@ -28,6 +28,11 @@ Escopo completo: documento "Escopo — Implantação Híbrida HSystem" (Claude D
   (botões de concluir, agendar e se inscrever desativados). O analista só encontra os hotéis dele.
 - **Cliente**: a implantação do próprio hotel.
 
+## Pesquisas (`supabase/07_pesquisas.sql`)
+- Admin cria em **Pesquisas**: título, texto, perguntas (texto curto/longo, múltipla escolha de uma ou várias opções),
+  endereço e para onde levar depois de enviar. Abrem sem login em `#/pesquisa/<endereço>`; respostas anônimas
+  (parâmetros do link como `utm_source` são guardados). Respostas na tela e em planilha CSV.
+
 ## Integração com o Sensedata
 - Função `impl-sync-sensedata`: só entram clientes com o playbook **Onboarding - Implantação Híbrida** e o campo
   **implantacao_academy** preenchido; eles viram hotéis; contratos (campo
