@@ -17,7 +17,7 @@ import VisaoHotel, { FaixaVisao } from './pages/VisaoHotel.jsx'
 import Pesquisas from './pages/Pesquisas.jsx'
 import PesquisaPublica from './pages/PesquisaPublica.jsx'
 import { SomenteLeitura } from './comum.jsx'
-import { AlternarTema } from './tema.jsx'
+import Layout from './Layout.jsx'
 import { TutoriaisProduto, TutorialPasso } from './pages/Tutoriais.jsx'
 
 const SIMULACAO = 'implantacao-hibrida-simulando'
@@ -29,15 +29,27 @@ const lerRota = () => {
   return h.includes('=') ? [] : h.split('/').filter(Boolean) // ignora o retorno dos links do Supabase (#access_token=…)
 }
 
+// Menu lateral por perfil, em grupos (como nos outros produtos HSystem).
 const MENU = {
-  cliente: [{ rota: '', rotulo: 'Início' }, { rota: 'implantacao', rotulo: 'Minha implantação' }],
-  analista: [{ rota: '', rotulo: 'Dashboard' }, { rota: 'hoteis', rotulo: 'Meus hotéis' }, { rota: 'visao', rotulo: 'Visão do hotel' }],
+  cliente: [
+    { titulo: 'Implantação', itens: [{ rota: '', rotulo: 'Início', icone: 'inicio' }, { rota: 'implantacao', rotulo: 'Minha implantação', icone: 'implantacao' }] },
+  ],
+  analista: [
+    { titulo: 'Acompanhamento', itens: [
+      { rota: '', rotulo: 'Dashboard', icone: 'dashboard' }, { rota: 'hoteis', rotulo: 'Meus hotéis', icone: 'hoteis' },
+      { rota: 'visao', rotulo: 'Visão do hotel', icone: 'visao' },
+    ] },
+  ],
   admin: [
-    { rota: '', rotulo: 'Conteúdo' }, { rota: 'dashboard', rotulo: 'Dashboard' }, { rota: 'hoteis', rotulo: 'Hotéis' },
-    { rota: 'visao', rotulo: 'Visão do hotel' }, { rota: 'analistas', rotulo: 'Analistas' }, { rota: 'acessos', rotulo: 'Acessos' },
-    { rota: 'pesquisas', rotulo: 'Pesquisas' },
+    { titulo: 'Acompanhamento', itens: [
+      { rota: 'dashboard', rotulo: 'Dashboard', icone: 'dashboard' }, { rota: 'hoteis', rotulo: 'Hotéis', icone: 'hoteis' },
+      { rota: 'visao', rotulo: 'Visão do hotel', icone: 'visao' },
+    ] },
+    { titulo: 'Conteúdo', itens: [{ rota: '', rotulo: 'Trilhas', icone: 'conteudo' }, { rota: 'pesquisas', rotulo: 'Pesquisas', icone: 'pesquisas' }] },
+    { titulo: 'Gestão', itens: [{ rota: 'analistas', rotulo: 'Analistas', icone: 'analistas' }, { rota: 'acessos', rotulo: 'Acessos', icone: 'acessos' }] },
   ],
 }
+const PAPEL = { cliente: 'Cliente', analista: 'Analista', admin: 'Admin' }
 
 // Título da aba por tela: "Início · HSystem Academy", "Minha implantação · HSystem Academy"…
 function tituloDaAba(perfil, pagina) {
@@ -45,7 +57,7 @@ function tituloDaAba(perfil, pagina) {
     ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'Minha implantação' : ['tutoriais', 'tutorial'].includes(pagina) ? 'Tutoriais' : 'Início')
     : pagina === 'hoteis' || pagina === 'hotel' ? (perfil === 'analista' ? 'Meus hotéis' : 'Hotéis')
     : pagina === 'analistas' ? 'Analistas' : pagina === 'acessos' ? 'Acessos' : pagina === 'visao' ? 'Visão do hotel' : pagina === 'pesquisas' ? 'Pesquisas'
-    : pagina === 'dashboard' || (perfil === 'analista' && !pagina) ? 'Dashboard' : 'Conteúdo'
+    : pagina === 'dashboard' || (perfil === 'analista' && !pagina) ? 'Dashboard' : 'Trilhas'
   return `${nome} · HSystem Academy`
 }
 
@@ -142,30 +154,14 @@ export default function App() {
     : pagina === 'hoteis' || pagina === 'hotel' ? 'hoteis'
     : ['analistas', 'acessos', 'dashboard', 'visao', 'pesquisas'].includes(pagina) ? pagina : ''
 
+  const nomeTela = tituloDaAba(usuario.perfil, pagina).split(' · ')[0]
   return (
-    <div className="layout">
-      {hotelSimulado && <FaixaVisao estado={estado} hotel={hotelSimulado} onEscolher={simular} />}
-      <header className="topo">
-        <a href="#" className="marca-sistema">
-          <img className="logo-inteiro" src="./logo.png" alt="HSystem Academy Clientes" />
-          <img className="logo-simbolo" src="./simbolo.png" alt="HSystem Academy Clientes" />
-        </a>
-        <nav>
-          {(MENU[usuario.perfil] ?? []).map((m) => (
-            <a key={m.rota} href={`#/${m.rota}`} className={ativa === m.rota ? 'ativa' : ''} aria-current={ativa === m.rota ? 'page' : undefined}>{m.rotulo}</a>
-          ))}
-        </nav>
-        <div className="quem">
-          <AlternarTema />
-          <span>
-            <b>{eu.nome}</b>
-            <small>{hotel ? hotel.nome : usuario.perfil === 'analista' ? 'Analista' : 'Admin'}</small>
-          </span>
-          <button className="btn fantasma pequeno" onClick={sair}>Sair</button>
-        </div>
-      </header>
-      <main className="pagina"><SomenteLeitura.Provider value={!!hotelSimulado}>{conteudo}</SomenteLeitura.Provider></main>
-    </div>
+    <Layout grupos={MENU[usuario.perfil] ?? []} ativa={ativa}
+      titulo={hotel ? hotel.nome : nomeTela} iconeTitulo={hotel ? 'hoteis' : null}
+      nome={eu.nome} papel={hotelSimulado ? 'Visão do hotel' : PAPEL[usuario.perfil]} onSair={sair}
+      faixa={hotelSimulado && <FaixaVisao estado={estado} hotel={hotelSimulado} onEscolher={simular} />}>
+      <SomenteLeitura.Provider value={!!hotelSimulado}>{conteudo}</SomenteLeitura.Provider>
+    </Layout>
   )
 }
 
