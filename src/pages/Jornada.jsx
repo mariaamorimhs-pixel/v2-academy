@@ -31,11 +31,11 @@ export default function Jornada({ estado, hotelId }) {
         <span className="sua-jornada-rotulo">Sua jornada</span>
         <Barra pct={prog.pct} rotulo="Progresso da implantação" />
         <span className="sua-jornada-fase">Implantação: {prog.pct}%</span>
-        <span className="sua-jornada-resumo">{prog.feitas} de {prog.total} passos concluídos</span>
       </div>
 
       <h2 className="secao-titulo passo-a-passo-titulo">Passo a passo</h2>
       <ol className="passo-a-passo">
+        <CardKickoff analista={analista} />
         {jornada.map((seg) => (seg.tipo === 'produto'
           ? <CardModulo key={seg.id} seg={seg} prog={prog} jornada={jornada} />
           : <CardReuniao key={seg.id} seg={seg} prog={prog} jornada={jornada} analista={analista} r={progresso.reunioes?.[seg.numero] ?? {}} />))}
@@ -90,7 +90,7 @@ function CardJornada({ st, cor, href, tipo, titulo, texto, icone, rodape, acao }
             <h3>{aberto ? <a href={href} className="link-cartao">{titulo}</a> : titulo}</h3>
           </div>
         </div>
-        <p className="cartao-jornada-texto">{texto}</p>
+        {texto && <p className="cartao-jornada-texto">{texto}</p>}
         <div className="cartao-jornada-rodape">
           {rodape}
           {acao}
@@ -114,7 +114,7 @@ function CardModulo({ seg, prog, jornada }) {
     : (
       <>
         <Barra pct={pct} fina rotulo={`Progresso do ${p.marca}`} />
-        <span className="cartao-jornada-pct">{p.marca}: {pct}% · {feitos} de {ids.length} passos</span>
+        <span className="cartao-jornada-pct">{p.marca}: {pct}%</span>
       </>
     )
   const acao = passoAtual
@@ -122,8 +122,17 @@ function CardModulo({ seg, prog, jornada }) {
     : null
   return (
     <CardJornada st={st} cor={seg.cor} href={st === 'preparacao' ? null : `#/produto/${seg.codigo}`}
-      tipo="Módulo" titulo={`${p.marca} - ${p.subtitulo}`} texto={p.resumo}
+      tipo="Módulo" titulo={`${p.marca} - ${p.subtitulo}`}
       icone={emAndamento || passoAtual ? <AnelProgresso pct={pct} /> : null} rodape={rodape} acao={acao} />
+  )
+}
+
+// Reunião inicial (kick-off): feita com a analista antes de a implantação começar, por isso já aparece realizada.
+function CardKickoff({ analista }) {
+  return (
+    <CardJornada st="concluido" tipo="Reunião" titulo="Reunião inicial (kick-off)"
+      texto={`Reunião de abertura${analista?.nome ? ` com sua analista ${analista.nome}` : ' com sua analista'}, antes de começar a implantação.`}
+      rodape={<span className="selo concluido">Realizada</span>} />
   )
 }
 
