@@ -27,7 +27,7 @@ export default function Produto({ estado, hotelId, codigo }) {
           const stEtapa = sts.every((s) => s === 'concluido') ? 'concluido'
             : sts.every((s) => s === 'bloqueado') ? 'bloqueado'
             : sts.includes('atual') ? 'atual'
-            : sts.every((s) => s === 'embreve' || s === 'concluido') ? 'embreve' : 'bloqueado'
+            : sts.every((s) => s === 'embreve' || s === 'concluido' || s === 'pendente') ? 'embreve' : 'bloqueado'
           return (
             <section key={e.id} className={`etapa ${stEtapa}`}>
               <header>
@@ -45,7 +45,7 @@ export default function Produto({ estado, hotelId, codigo }) {
                     <li key={p.id} className={st}>
                       {st === 'bloqueado'
                         ? <div className="passo-linha"><Marca status={st} /><span>{p.titulo}</span></div>
-                        : <a className="passo-linha" href={`#/passo/${p.id}`}><Marca status={st} /><span>{p.titulo}</span>{st === 'atual' && <Selo status="atual">Próximo</Selo>}{st === 'embreve' && <Selo status="embreve" />}</a>}
+                        : <a className="passo-linha" href={`#/passo/${p.id}`}><Marca status={st} /><span>{p.titulo}</span>{st === 'atual' && <Selo status="atual">Próximo</Selo>}{st === 'embreve' && <Selo status="embreve" />}{st === 'pendente' && <Selo status="pendente" />}</a>}
                     </li>
                   )
                 })}

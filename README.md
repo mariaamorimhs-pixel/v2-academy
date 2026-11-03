@@ -31,6 +31,13 @@ Escopo completo: documento "Escopo — Implantação Híbrida HSystem" (Claude D
   (botões de concluir, agendar e se inscrever desativados). O analista só encontra os hotéis dele.
 - **Cliente**: a implantação do próprio hotel.
 
+## Estrutura das trilhas (`supabase/12_estrutura_trilhas.sql`)
+- Etapas e passos ficam no banco (`impl_etapas`, `impl_passos`), com os ids originais; `src/trilhas.js` guarda o padrão
+  e `aplicarEstrutura()` aplica o que está no banco ao carregar.
+- Em Conteúdo → Trilhas, "Editar estrutura": adicionar, reordenar, renomear e excluir etapas e passos (função
+  `impl_editar_trilha`). Excluir esconde e dá para restaurar; quem já concluiu continua registrado.
+- Passo novo antes de onde o cliente já chegou aparece como "Novo" (pendente): não trava e conta na porcentagem.
+
 ## Treinamentos (menu do cliente)
 - **Ao vivo em grupo** (turmas e inscrição pelo Calendly), **Tutoriais** (consulta livre das trilhas) e **Gravados**
   (gravações das turmas, `supabase/09_gravacoes.sql`): todos os clientes veem todas; o admin cadastra em Conteúdo → Gravações

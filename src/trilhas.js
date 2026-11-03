@@ -1,6 +1,7 @@
 // Catálogo das trilhas: produto → etapas → passos.
-// A estrutura é fixa no código; título, texto e vídeo de cada passo são editados pela editora
-// (o que ela salva fica em `conteudo` e sobrepõe o padrão daqui).
+// A estrutura padrão está aqui, mas a que vale é a do banco (impl_etapas e impl_passos, editada em Trilhas):
+// ao carregar os dados, aplicarEstrutura() troca as etapas de cada produto pelas do banco.
+// Título, texto e vídeo de cada passo vêm de `conteudo` e sobrepõem o padrão.
 
 // Etapa com N passos sem nome ("Parte 1", "Parte 2"…) ou com a lista de nomes dos passos.
 // Etapa de um passo só: o passo leva o nome da etapa.
@@ -111,6 +112,22 @@ export const CATALOGO = Object.fromEntries(
     },
   ]),
 )
+
+// Troca as etapas e os passos de cada produto pelos do banco (só os não excluídos, na ordem salva).
+// Sem nada no banco, fica a estrutura padrão daqui.
+export function aplicarEstrutura(etapas, passos) {
+  if (!etapas?.length) return
+  for (const codigo of Object.keys(CATALOGO)) {
+    CATALOGO[codigo].etapas = etapas
+      .filter((e) => e.produto === codigo && !e.oculta)
+      .sort((a, b) => a.ordem - b.ordem)
+      .map((e) => ({
+        id: e.id, titulo: e.titulo,
+        ...(e.somente_sem ? { somenteSem: e.somente_sem } : {}), ...(e.nota ? { nota: e.nota } : {}),
+        passos: passos.filter((p) => p.etapa_id === e.id && !p.oculto).sort((a, b) => a.ordem - b.ordem).map((p) => ({ id: p.id, titulo: p.titulo })),
+      }))
+  }
+}
 
 export const nomeProduto = (codigo) => CATALOGO[codigo]?.nome ?? codigo
 // Treinamentos ao vivo em grupo: agendas de turma no Calendly da HSystem. O hai não tem turma.

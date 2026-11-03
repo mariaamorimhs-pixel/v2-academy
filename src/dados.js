@@ -3,6 +3,7 @@
 // que conferem quem está pedindo.
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabase.js'
+import { aplicarEstrutura } from './trilhas.js'
 
 let estado = { carregado: false, usuarios: [], hoteis: [], progresso: {}, conteudo: {}, inscricoes: {} }
 const ouvintes = new Set()
@@ -25,6 +26,8 @@ export async function recarregar() {
     supabase.from('impl_reunioes').select('hotel_id, numero, agendada_para, agendada_em, realizada_em, realizada_por'),
     supabase.from('impl_conteudo').select('passo_id, titulo, video, texto'),
     supabase.from('impl_inscricoes').select('hotel_id, treino_id, por_nome, em'),
+    supabase.from('impl_etapas').select('id, produto, titulo, ordem, somente_sem, nota, oculta'),
+    supabase.from('impl_passos').select('id, etapa_id, titulo, ordem, oculto, criado_em'),
     supabase.from('impl_gravacoes').select('id, treino_id, titulo, descricao, video, gravado_em, criado_em').order('gravado_em', { ascending: false, nullsFirst: false }),
     // integração com o Sensedata: só o admin recebe linhas (regras do banco)
     supabase.from('impl_config').select('chave, valor'),
@@ -33,7 +36,9 @@ export async function recarregar() {
   ])
   const erro = respostas.find((r) => r.error)?.error
   if (erro) throw new Error(erro.message)
-  const [usuarios, hoteis, contratos, passos, reunioes, conteudo, inscricoes, gravacoes, config, syncLog, alertas] = respostas.map((r) => r.data)
+  const [usuarios, hoteis, contratos, passos, reunioes, conteudo, inscricoes, etapas, passosTrilha, gravacoes, config, syncLog, alertas] = respostas.map((r) => r.data)
+
+  aplicarEstrutura(etapas, passosTrilha)
 
   const progresso = {}
   for (const h of hoteis) progresso[h.id] = { passos: {}, reunioes: {}, ultimaAtividade: h.ultima_atividade }
@@ -59,6 +64,7 @@ export async function recarregar() {
     progresso,
     conteudo: Object.fromEntries(conteudo.map((c) => [c.passo_id, semNulos({ titulo: c.titulo, video: c.video, texto: c.texto })])),
     gravacoes,
+    estrutura: { etapas, passos: passosTrilha },
     inscricoes: inscricoes.reduce((acc, i) => { (acc[i.hotel_id] ??= {})[i.treino_id] = { por: i.por_nome, em: i.em }; return acc }, {}),
     integracao: {
       historico: syncLog,
@@ -112,6 +118,14 @@ export async function criarAcesso({ nome, email, perfil, hotelId, calendly }) {
 export const atualizarAcesso = (id, { nome, email, perfil, hotelId, calendly }) =>
   acao('impl_atualizar_acesso', { p_id: id, p_nome: nome, p_email: email, p_perfil: perfil, p_hotel: hotelId || null, p_calendly: calendly || null })
 export const removerAcesso = (id) => acao('impl_remover_acesso', { p_id: id })
+
+// Edição da estrutura das trilhas (só admin): ver impl_editar_trilha. Devolve o id criado.
+export async function editarTrilha(acao, alvo, texto) {
+  const { data, error } = await supabase.rpc('impl_editar_trilha', { p_acao: acao, p_alvo: alvo, p_texto: texto ?? null })
+  if (error) throw new Error(error.message)
+  await recarregar()
+  return data
+}
 
 // Treinamentos gravados (só admin cadastra).
 export const salvarGravacao = (id, g) =>

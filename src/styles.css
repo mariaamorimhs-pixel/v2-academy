@@ -788,3 +788,26 @@ html[data-tema="escuro"] .recolhido .lateral-marca { padding: 0 4px; }
 .painel-dados dt { font-size: 13px; font-weight: 500; color: var(--muted); }
 .painel-dados dd { margin: 0; }
 .painel-dados p { margin: 0; }
+.selo.pendente { background: var(--accent-bg); color: var(--accent-forte); }
+.marca.pendente { border: 2px dashed var(--accent); background: transparent; }
+
+/* ---- Editor: edição da estrutura das trilhas ---- */
+.editor-lado { display: flex; flex-direction: column; gap: 10px; position: sticky; top: 84px; }
+.editor-lado > .btn { align-self: flex-start; }
+.editor-lado .editor-arvore { position: static; max-height: calc(100vh - 160px); }
+.arvore-etapa-linha, .arvore-passo-linha { display: flex; align-items: center; gap: 4px; }
+.arvore-etapa-linha .arvore-etapa-titulo { flex: 1; min-width: 0; }
+.arvore-passo-linha .arvore-passo { flex: 1; min-width: 0; }
+.arvore-acoes { display: inline-flex; gap: 2px; flex: none; }
+.botao-icone { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font: inherit; font-size: 14px; cursor: pointer; }
+.botao-icone:hover:not(:disabled) { background: var(--accent-bg); color: var(--accent-forte); }
+.botao-icone.perigo:hover:not(:disabled) { background: var(--crit-bg); color: var(--crit); }
+.botao-icone:disabled { opacity: .3; cursor: default; }
+.botao-icone:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.arvore-adicionar { display: block; margin: 4px 0 2px 22px; text-decoration: none; font-weight: 600; }
+.arvore-adicionar:hover { text-decoration: underline; }
+.editor-arvore.estruturando { border-color: var(--accent); }
+.arvore-excluidos { margin: 8px 10px 4px; padding-top: 8px; border-top: 1px dashed var(--border-forte); display: flex; flex-direction: column; gap: 2px; }
+.arvore-excluidos p { margin: 0 0 4px; }
+.arvore-excluidos .arvore-passo-linha { justify-content: space-between; padding-left: 12px; }
+@media (max-width: 860px) { .editor-lado { position: static; } .editor-lado .editor-arvore { max-height: none; } }

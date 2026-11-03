@@ -38,7 +38,7 @@ export function montarJornada(contratos, conteudo = {}) {
     for (const codigo of produtos) {
       const produto = CATALOGO[codigo]
       const etapas = produto.etapas
-        .filter((e) => !(e.somenteSem && planos.has(e.somenteSem)))
+        .filter((e) => e.passos.length && !(e.somenteSem && planos.has(e.somenteSem)))
         .map((e) => ({ ...e, passos: e.passos.map((p) => comPublicacao({ ...p, ...conteudo[p.id] })) }))
       jornada.push({ tipo: 'produto', id: codigo, codigo, nome: produto.nome, cor: produto.cor, descricao: produto.descricao, etapas })
     }
@@ -50,6 +50,8 @@ export function montarJornada(contratos, conteudo = {}) {
 // Tudo trava em sequência: cada passo e cada reunião é uma unidade; a primeira não concluída é a atual
 // e todas depois dela ficam bloqueadas. Reunião só conta como concluída quando o analista confirma.
 // Passos não publicados ficam "embreve": nunca são o atual e não seguram o avanço; continuam no total.
+// Passo não feito com algo depois dele já concluído (ex.: passo adicionado depois que o cliente já tinha passado
+// por ali) fica "pendente": aparece como Novo, pode ser feito quando quiser e não trava nada; continua no total.
 export function calcularProgresso(jornada, progresso = {}) {
   const passosFeitos = progresso.passos ?? {}
   const reunioes = progresso.reunioes ?? {}
@@ -67,8 +69,10 @@ export function calcularProgresso(jornada, progresso = {}) {
   const status = {}
   const depoisDoAtual = new Set()
   let atual = null
-  for (const u of unidades) {
+  const ultimoFeito = unidades.reduce((ult, u, i) => (u.feito ? i : ult), -1)
+  for (const [i, u] of unidades.entries()) {
     const emBreve = u.tipo === 'passo' && !u.publicado && !u.feito
+    if (!atual && u.tipo === 'passo' && !u.feito && !emBreve && i < ultimoFeito) { status[u.id] = 'pendente'; continue }
     if (atual) { status[u.id] = emBreve ? 'embreve' : 'bloqueado'; depoisDoAtual.add(u.id) }
     else if (u.feito) status[u.id] = 'concluido'
     else if (emBreve) status[u.id] = 'embreve'
@@ -85,7 +89,7 @@ export function calcularProgresso(jornada, progresso = {}) {
     status[seg.id] = ids.every((id) => depoisDoAtual.has(id)) ? 'bloqueado'
       : s.includes('atual') ? 'atual'
       : s.every((x) => x === 'concluido') ? 'concluido'
-      : 'embreve'
+      : 'embreve' // concluído com passos em breve ou novos (pendentes) que não travam
   }
 
   const feitas = unidades.filter((u) => status[u.id] === 'concluido').length

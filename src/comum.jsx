@@ -122,10 +122,10 @@ export function Marca({ status }) {
       </span>
     )
   }
-  return <span className={`marca ${status}`} aria-label={status === 'atual' ? 'Liberado' : status === 'embreve' ? 'Em breve' : 'Em preparação'} />
+  return <span className={`marca ${status}`} aria-label={status === 'atual' ? 'Liberado' : status === 'embreve' ? 'Em breve' : status === 'pendente' ? 'Novo, ainda não feito' : 'Em preparação'} />
 }
 
-const ROTULOS = { concluido: 'Concluído', atual: 'Em andamento', bloqueado: 'Bloqueado', preparacao: 'Em preparação', embreve: 'Em breve' }
+const ROTULOS = { concluido: 'Concluído', atual: 'Em andamento', bloqueado: 'Bloqueado', preparacao: 'Em preparação', embreve: 'Em breve', pendente: 'Novo' }
 export const Selo = ({ status, children }) => <span className={`selo ${status}`}>{children ?? ROTULOS[status]}</span>
 
 // Nome único da reunião em todas as telas: "Reunião de revisão do HBook" (+ " com Ana Lima" quando houver analista).
