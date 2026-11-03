@@ -776,3 +776,10 @@ html[data-tema="escuro"] .recolhido .lateral-marca { padding: 0 4px; }
   .painel-rodape { flex-wrap: wrap; }
 }
 @media (prefers-reduced-motion: reduce) { .painel-lateral { animation: none; } }
+
+/* ---- Onde o cliente parou (página do hotel) ---- */
+.onde-parou { display: flex; flex-direction: column; gap: 8px; }
+.onde-parou h2 { font-size: 16px; margin: 0; }
+.onde-parou p { margin: 0; }
+.onde-parou-etapa { font-weight: 600; }
+.onde-parou-link { overflow-wrap: anywhere; }

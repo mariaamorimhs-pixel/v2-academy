@@ -1,6 +1,7 @@
 import { dadosDoHotel, Barra, fmtDataHora, diasDesde, nomeReuniao } from '../comum.jsx'
 import { nomeProduto, corProduto } from '../trilhas.js'
 import PainelSensedata from './Sensedata.jsx'
+import { CopiarLinkOndeParou } from '../OndeParou.jsx'
 
 // Onde cada hotel está: produto atual, % concluído, situação da reunião e há quantos dias está parado.
 export function situacaoDoHotel(d) {
@@ -55,6 +56,7 @@ export default function Hoteis({ estado, usuario, todos }) {
               <th>Concluído</th>
               <th>Reunião</th>
               <th className="num">Dias parado</th>
+              <th><span className="sr-only">Link de onde parou</span></th>
             </tr>
           </thead>
           <tbody>
@@ -66,6 +68,7 @@ export default function Hoteis({ estado, usuario, todos }) {
                 <td className="col-pct"><Barra pct={l.prog.pct} fina /><span className="pequeno">{l.prog.pct}%</span></td>
                 <td>{l.reuniao ? <span className={`selo ${l.reuniao.tipo === 'agendada' ? 'atual' : 'alerta'}`}>{l.reuniao.texto}</span> : <span className="muted">—</span>}</td>
                 <td className="num"><span className={l.dias >= 7 ? 'selo critico' : l.dias >= 3 ? 'selo alerta' : ''}>{l.dias ?? '—'}</span></td>
+                <td className="sem-quebra"><CopiarLinkOndeParou d={l} /></td>
               </tr>
             ))}
           </tbody>

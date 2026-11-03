@@ -4,6 +4,7 @@ import { avaliarContrato } from '../regras.js'
 import { marcarReuniaoRealizada, zerarHotelTeste } from '../dados.js'
 import { BotaoConvite } from './Acessos.jsx'
 import { situacaoDoHotel } from './Hoteis.jsx'
+import { CartaoOndeParou } from '../OndeParou.jsx'
 
 // Detalhe do hotel para o analista: contratos lidos do Sensedata, usuários, progresso por produto
 // e o botão que confirma a reunião e libera o próximo bloco.
@@ -96,6 +97,7 @@ export default function Hotel({ estado, usuario, hotelId, onSimular }) {
         </div>
 
         <aside className="hotel-lado">
+          <CartaoOndeParou d={d} />
           {onSimular && (
             <section className="cartao ferramentas">
               <h2>Ferramentas</h2>
