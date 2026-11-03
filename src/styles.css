@@ -704,3 +704,19 @@ html[data-tema="escuro"] .recolhido .lateral-marca { padding: 0 4px; }
 }
 @media (max-width: 560px) { .barra-topo-sair span { display: none; } .barra-topo-sair { padding: 0 10px; } }
 @media (prefers-reduced-motion: reduce) { .lateral { transition: none; } }
+
+/* ---- Treinamentos gravados ---- */
+.gravados-filtro { margin-bottom: 16px; }
+.grade-gravados { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.cartao-gravacao { height: 100%; display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: var(--text); border-top: 4px solid var(--cor, var(--accent)); padding: 20px; }
+.cartao-gravacao:hover { border-color: var(--cor, var(--accent)); box-shadow: var(--sombra-alta); }
+.cartao-gravacao:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cartao-gravacao b { font-size: 17px; line-height: 1.35; }
+.gravacao-resumo { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.gravacao-etiqueta { align-self: flex-start; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: color-mix(in srgb, var(--cor, var(--accent)) var(--mistura-pct), var(--mistura-cor)); }
+.gravacao-rodape { margin-top: auto; padding-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.gravacao-assistir { color: var(--accent); font-weight: 600; font-size: 14px; white-space: nowrap; }
+.gravacao-player { display: flex; flex-direction: column; gap: 16px; }
+.gravacao-descricao { white-space: pre-line; margin: 0; }
+.form-gravacao { margin-bottom: 20px; }
+.form-gravacao .linha-form label { flex: 1 1 220px; }

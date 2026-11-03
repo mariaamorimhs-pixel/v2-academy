@@ -14,10 +14,10 @@ const Voltar = ({ href, texto }) => <a href={href} className="voltar">← {texto
 
 export function TutoriaisProduto({ estado, codigo }) {
   const p = produtoComConteudo(codigo, estado.conteudo)
-  if (!p || !p.etapas.length) return <><Voltar href="#/" texto="Início" /><p>Tutorial em preparação.</p></>
+  if (!p || !p.etapas.length) return <><Voltar href="#/tutoriais" texto="Tutoriais" /><p>Tutorial em preparação.</p></>
   return (
     <>
-      <Voltar href="#/" texto="Início" />
+      <Voltar href="#/tutoriais" texto="Tutoriais" />
       <header className="cabecalho cabecalho-produto" style={{ '--cor': p.cor }}>
         <div>
           <h1>{p.nome}</h1>
@@ -57,7 +57,7 @@ export function TutorialPasso({ estado, passoId }) {
   const p = codigo && produtoComConteudo(codigo, estado.conteudo)
   const lista = p ? p.etapas.flatMap((e) => e.passos.map((ps) => ({ etapa: e, passo: ps }))) : []
   const i = lista.findIndex((x) => x.passo.id === passoId)
-  if (i < 0) return <><Voltar href="#/" texto="Início" /><p>Tutorial não encontrado.</p></>
+  if (i < 0) return <><Voltar href="#/tutoriais" texto="Tutoriais" /><p>Tutorial não encontrado.</p></>
   const { etapa, passo } = lista[i]
   const prox = lista[i + 1]
   return (

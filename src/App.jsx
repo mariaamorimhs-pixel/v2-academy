@@ -16,6 +16,8 @@ import Acessos from './pages/Acessos.jsx'
 import VisaoHotel, { FaixaVisao } from './pages/VisaoHotel.jsx'
 import Pesquisas from './pages/Pesquisas.jsx'
 import PesquisaPublica from './pages/PesquisaPublica.jsx'
+import { AoVivo, ListaTutoriais, Gravados } from './pages/Treinamentos.jsx'
+import Gravacoes from './pages/Gravacoes.jsx'
 import { SomenteLeitura } from './comum.jsx'
 import Layout from './Layout.jsx'
 import { TutoriaisProduto, TutorialPasso } from './pages/Tutoriais.jsx'
@@ -33,6 +35,10 @@ const lerRota = () => {
 const MENU = {
   cliente: [
     { titulo: 'Implantação', itens: [{ rota: '', rotulo: 'Início', icone: 'inicio' }, { rota: 'implantacao', rotulo: 'Minha implantação', icone: 'implantacao' }] },
+    { titulo: 'Treinamentos', itens: [
+      { rota: 'ao-vivo', rotulo: 'Ao vivo em grupo', icone: 'aovivo' }, { rota: 'tutoriais', rotulo: 'Tutoriais', icone: 'tutoriais' },
+      { rota: 'gravados', rotulo: 'Gravados', icone: 'gravados' },
+    ] },
   ],
   analista: [
     { titulo: 'Acompanhamento', itens: [
@@ -45,7 +51,7 @@ const MENU = {
       { rota: 'dashboard', rotulo: 'Dashboard', icone: 'dashboard' }, { rota: 'hoteis', rotulo: 'Hotéis', icone: 'hoteis' },
       { rota: 'visao', rotulo: 'Visão do hotel', icone: 'visao' },
     ] },
-    { titulo: 'Conteúdo', itens: [{ rota: '', rotulo: 'Trilhas', icone: 'conteudo' }, { rota: 'pesquisas', rotulo: 'Pesquisas', icone: 'pesquisas' }] },
+    { titulo: 'Conteúdo', itens: [{ rota: '', rotulo: 'Trilhas', icone: 'conteudo' }, { rota: 'gravacoes', rotulo: 'Gravações', icone: 'gravados' }, { rota: 'pesquisas', rotulo: 'Pesquisas', icone: 'pesquisas' }] },
     { titulo: 'Gestão', itens: [{ rota: 'analistas', rotulo: 'Analistas', icone: 'analistas' }, { rota: 'acessos', rotulo: 'Acessos', icone: 'acessos' }] },
   ],
 }
@@ -54,9 +60,10 @@ const PAPEL = { cliente: 'Cliente', analista: 'Analista', admin: 'Admin' }
 // Título da aba por tela: "Início · HSystem Academy", "Minha implantação · HSystem Academy"…
 function tituloDaAba(perfil, pagina) {
   const nome = perfil === 'cliente'
-    ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'Minha implantação' : ['tutoriais', 'tutorial'].includes(pagina) ? 'Tutoriais' : 'Início')
+    ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'Minha implantação' : ['tutoriais', 'tutorial'].includes(pagina) ? 'Tutoriais'
+      : pagina === 'ao-vivo' ? 'Ao vivo em grupo' : pagina === 'gravados' ? 'Gravados' : 'Início')
     : pagina === 'hoteis' || pagina === 'hotel' ? (perfil === 'analista' ? 'Meus hotéis' : 'Hotéis')
-    : pagina === 'analistas' ? 'Analistas' : pagina === 'acessos' ? 'Acessos' : pagina === 'visao' ? 'Visão do hotel' : pagina === 'pesquisas' ? 'Pesquisas'
+    : pagina === 'analistas' ? 'Analistas' : pagina === 'acessos' ? 'Acessos' : pagina === 'visao' ? 'Visão do hotel' : pagina === 'pesquisas' ? 'Pesquisas' : pagina === 'gravacoes' ? 'Gravações'
     : pagina === 'dashboard' || (perfil === 'analista' && !pagina) ? 'Dashboard' : 'Trilhas'
   return `${nome} · HSystem Academy`
 }
@@ -128,7 +135,9 @@ export default function App() {
       : pagina === 'passo' ? <Passo {...props} passoId={param} />
       : pagina === 'reuniao' ? <Reuniao {...props} numero={Number(param)} />
       : pagina === 'implantacao' ? <Jornada {...props} />
-      : pagina === 'tutoriais' ? <TutoriaisProduto estado={estado} codigo={param} />
+      : pagina === 'tutoriais' ? (param ? <TutoriaisProduto estado={estado} codigo={param} /> : <ListaTutoriais />)
+      : pagina === 'ao-vivo' ? <AoVivo {...props} />
+      : pagina === 'gravados' ? <Gravados estado={estado} gravacaoId={param} />
       : pagina === 'tutorial' ? <TutorialPasso estado={estado} passoId={param} />
       : <Inicio {...props} />
   } else if (usuario.perfil === 'analista') {
@@ -142,6 +151,7 @@ export default function App() {
       : pagina === 'analistas' ? <Analistas estado={estado} />
       : pagina === 'acessos' ? <Acessos estado={estado} />
       : pagina === 'pesquisas' ? <Pesquisas rota={rota} />
+      : pagina === 'gravacoes' ? <Gravacoes estado={estado} />
       : pagina === 'visao' ? <VisaoHotel estado={estado} onEscolher={simular} />
       : pagina === 'dashboard' ? <Dashboard estado={estado} usuario={usuario} />
       : pagina === 'hotel' ? <Hotel estado={estado} usuario={usuario} hotelId={param} onSimular={simular} />
@@ -150,9 +160,10 @@ export default function App() {
 
   const hotel = usuario.hotelId && estado.hoteis.find((h) => h.id === usuario.hotelId)
   const ativa = usuario.perfil === 'cliente'
-    ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'implantacao' : '')
+    ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'implantacao'
+      : pagina === 'tutorial' ? 'tutoriais' : ['ao-vivo', 'tutoriais', 'gravados'].includes(pagina) ? pagina : '')
     : pagina === 'hoteis' || pagina === 'hotel' ? 'hoteis'
-    : ['analistas', 'acessos', 'dashboard', 'visao', 'pesquisas'].includes(pagina) ? pagina : ''
+    : ['analistas', 'acessos', 'dashboard', 'visao', 'pesquisas', 'gravacoes'].includes(pagina) ? pagina : ''
 
   const nomeTela = tituloDaAba(usuario.perfil, pagina).split(' · ')[0]
   return (

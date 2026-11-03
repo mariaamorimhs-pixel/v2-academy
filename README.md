@@ -28,6 +28,11 @@ Escopo completo: documento "Escopo — Implantação Híbrida HSystem" (Claude D
   (botões de concluir, agendar e se inscrever desativados). O analista só encontra os hotéis dele.
 - **Cliente**: a implantação do próprio hotel.
 
+## Treinamentos (menu do cliente)
+- **Ao vivo em grupo** (turmas e inscrição pelo Calendly), **Tutoriais** (consulta livre das trilhas) e **Gravados**
+  (gravações das turmas, `supabase/09_gravacoes.sql`): todos os clientes veem todas; o admin cadastra em Conteúdo → Gravações
+  (link do YouTube por enquanto).
+
 ## Pesquisas (`supabase/07_pesquisas.sql`)
 - Admin cria em **Pesquisas**: título, texto, perguntas (texto curto/longo, múltipla escolha de uma ou várias opções),
   endereço e para onde levar depois de enviar. Abrem sem login em `#/pesquisa/<endereço>`; respostas anônimas

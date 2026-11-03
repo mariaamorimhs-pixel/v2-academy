@@ -25,6 +25,7 @@ export async function recarregar() {
     supabase.from('impl_reunioes').select('hotel_id, numero, agendada_para, agendada_em, realizada_em, realizada_por'),
     supabase.from('impl_conteudo').select('passo_id, titulo, video, texto'),
     supabase.from('impl_inscricoes').select('hotel_id, treino_id, por_nome, em'),
+    supabase.from('impl_gravacoes').select('id, treino_id, titulo, descricao, video, gravado_em, criado_em').order('gravado_em', { ascending: false, nullsFirst: false }),
     // integração com o Sensedata: só o admin recebe linhas (regras do banco)
     supabase.from('impl_config').select('chave, valor'),
     supabase.from('impl_sync_log').select('id, origem, iniciado_em, terminado_em, ok, resumo, erro').order('id', { ascending: false }).limit(15),
@@ -32,7 +33,7 @@ export async function recarregar() {
   ])
   const erro = respostas.find((r) => r.error)?.error
   if (erro) throw new Error(erro.message)
-  const [usuarios, hoteis, contratos, passos, reunioes, conteudo, inscricoes, config, syncLog, alertas] = respostas.map((r) => r.data)
+  const [usuarios, hoteis, contratos, passos, reunioes, conteudo, inscricoes, gravacoes, config, syncLog, alertas] = respostas.map((r) => r.data)
 
   const progresso = {}
   for (const h of hoteis) progresso[h.id] = { passos: {}, reunioes: {}, ultimaAtividade: h.ultima_atividade }
@@ -57,6 +58,7 @@ export async function recarregar() {
       .sort((a, b) => a.nome.localeCompare(b.nome)),
     progresso,
     conteudo: Object.fromEntries(conteudo.map((c) => [c.passo_id, semNulos({ titulo: c.titulo, video: c.video, texto: c.texto })])),
+    gravacoes,
     inscricoes: inscricoes.reduce((acc, i) => { (acc[i.hotel_id] ??= {})[i.treino_id] = { por: i.por_nome, em: i.em }; return acc }, {}),
     integracao: {
       historico: syncLog,
@@ -110,6 +112,11 @@ export async function criarAcesso({ nome, email, perfil, hotelId }) {
   await recarregar()
   return data
 }
+
+// Treinamentos gravados (só admin cadastra).
+export const salvarGravacao = (id, g) =>
+  acao('impl_salvar_gravacao', { p_id: id ?? null, p_treino: g.treinoId, p_titulo: g.titulo, p_descricao: g.descricao, p_video: g.video, p_gravado_em: g.gravadoEm || null })
+export const excluirGravacao = (id) => acao('impl_excluir_gravacao', { p_id: id })
 
 // Inscrição feita pela janela do Calendly (o Calendly avisa a página quando a pessoa conclui).
 export const registrarInscricao = (hotelId, treinoId) => acaoDoCliente('impl_registrar_inscricao', { p_hotel: hotelId, p_treino: treinoId })

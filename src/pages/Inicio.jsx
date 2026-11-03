@@ -52,9 +52,7 @@ function produtosDoMomento(prog) {
 // Tela inicial do cliente: a implantação em destaque (tarefa principal), depois treinamentos ao vivo e tutoriais.
 export default function Inicio({ estado, usuario, hotelId }) {
   const d = dadosDoHotel(estado, hotelId)
-  const [calendly, setCalendly] = useState(null)
   if (!d) return <p>Hotel não encontrado.</p>
-  const doMomento = produtosDoMomento(d.prog)
 
   return (
     <>
@@ -64,61 +62,76 @@ export default function Inicio({ estado, usuario, hotelId }) {
 
       <CartaoImplantacao d={d} />
 
-      <section className="secao">
-        <h2 className="secao-titulo">Treinamentos ao vivo em grupo</h2>
-        <p className="muted pequeno">Turmas com especialistas da HSystem. Escolha o melhor horário e se inscreva.</p>
-        <ul className="grade-treinos">
-          {TREINAMENTOS_GRUPO.map((t) => (
-            <li key={t.id} className="cartao-treino" style={{ '--cor': t.cor }}>
-              {t.produtos.some((p) => doMomento.includes(p)) && <Selo status="atual">Do seu próximo passo</Selo>}
-              <h3>Treinamento em grupo do {t.titulo}</h3>
-              <p className="treino-meta">
-                <span><IconeVideo /> Webinar no Zoom</span>
-                <span aria-hidden="true">·</span>
-                <span><IconeRelogio /> 1 hora</span>
-              </p>
-              <ul className="treino-sessoes">
-                {t.sessoes.map((s) => (
-                  <li key={s.dia}>
-                    <span className="treino-dia">Toda {s.dia.toLowerCase()}</span>
-                    <span className="treino-proxima">próxima: {proximaData(s)}</span>
-                    <span className="treino-hora">{s.hora.replace("h00", "h")}</span>
-                  </li>
-                ))}
-              </ul>
-              <BotaoInscricao treino={t} inscricao={d.inscricoes?.[t.id]} onAbrir={() => setCalendly(t)} />
-            </li>
-          ))}
-        </ul>
-      </section>
+      <TreinosAoVivo d={d} hotelId={hotelId} />
 
       <section className="secao">
         <h2 className="secao-titulo">Tutoriais</h2>
-        <div className="grade-tutoriais">
-          {ORDEM_TUTORIAIS.map((codigo) => {
-            const p = CATALOGO[codigo]
-            const vazio = !p.etapas.length
-            const Tag = vazio ? 'div' : 'a'
-            return (
-              <Tag key={codigo} className={`cartao-tutorial ${vazio ? 'vazio' : ''}`} style={{ '--cor': corProduto(codigo) }}
-                aria-label={`Tutoriais de ${nomeProduto(codigo)}: ${vazio ? 'em breve' : p.descricao}`}
-                {...(vazio ? { role: 'group' } : { href: `#/tutoriais/${codigo}` })}>
-                {IMAGEM_TUTORIAL[codigo] && !vazio ? (
-                  <img src={IMAGEM_TUTORIAL[codigo]} alt="" loading="lazy" />
-                ) : (
-                  <span className="cartao-tutorial-texto">
-                    <b>{nomeProduto(codigo)}</b>
-                    {vazio ? <Selo status="embreve" /> : <span>{p.descricao}</span>}
-                  </span>
-                )}
-              </Tag>
-            )
-          })}
-        </div>
+        <GradeTutoriais />
       </section>
-
-      {calendly && <JanelaCalendly treino={calendly} onFechar={() => setCalendly(null)} onAgendado={() => tentar(() => registrarInscricao(hotelId, calendly.id))} />}
     </>
+  )
+}
+
+// Treinamentos ao vivo em grupo (no Início e na página "Ao vivo em grupo"): turmas, próximas datas e inscrição pelo Calendly.
+export function TreinosAoVivo({ d, hotelId, titulo = true }) {
+  const [calendly, setCalendly] = useState(null)
+  const doMomento = produtosDoMomento(d.prog)
+  return (
+    <section className="secao">
+      {titulo && <h2 className="secao-titulo">Treinamentos ao vivo em grupo</h2>}
+      <p className="muted pequeno">Turmas com especialistas da HSystem. Escolha o melhor horário e se inscreva.</p>
+      <ul className="grade-treinos">
+        {TREINAMENTOS_GRUPO.map((t) => (
+          <li key={t.id} className="cartao-treino" style={{ '--cor': t.cor }}>
+            {t.produtos.some((p) => doMomento.includes(p)) && <Selo status="atual">Do seu próximo passo</Selo>}
+            <h3>Treinamento em grupo do {t.titulo}</h3>
+            <p className="treino-meta">
+              <span><IconeVideo /> Webinar no Zoom</span>
+              <span aria-hidden="true">·</span>
+              <span><IconeRelogio /> 1 hora</span>
+            </p>
+            <ul className="treino-sessoes">
+              {t.sessoes.map((s) => (
+                <li key={s.dia}>
+                  <span className="treino-dia">Toda {s.dia.toLowerCase()}</span>
+                  <span className="treino-proxima">próxima: {proximaData(s)}</span>
+                  <span className="treino-hora">{s.hora.replace("h00", "h")}</span>
+                </li>
+              ))}
+            </ul>
+            <BotaoInscricao treino={t} inscricao={d.inscricoes?.[t.id]} onAbrir={() => setCalendly(t)} />
+          </li>
+        ))}
+      </ul>
+      {calendly && <JanelaCalendly treino={calendly} onFechar={() => setCalendly(null)} onAgendado={() => tentar(() => registrarInscricao(hotelId, calendly.id))} />}
+    </section>
+  )
+}
+
+// Cartões dos tutoriais por produto (no Início e na página "Tutoriais").
+export function GradeTutoriais() {
+  return (
+    <div className="grade-tutoriais">
+      {ORDEM_TUTORIAIS.map((codigo) => {
+        const p = CATALOGO[codigo]
+        const vazio = !p.etapas.length
+        const Tag = vazio ? 'div' : 'a'
+        return (
+          <Tag key={codigo} className={`cartao-tutorial ${vazio ? 'vazio' : ''}`} style={{ '--cor': corProduto(codigo) }}
+            aria-label={`Tutoriais de ${nomeProduto(codigo)}: ${vazio ? 'em breve' : p.descricao}`}
+            {...(vazio ? { role: 'group' } : { href: `#/tutoriais/${codigo}` })}>
+            {IMAGEM_TUTORIAL[codigo] && !vazio ? (
+              <img src={IMAGEM_TUTORIAL[codigo]} alt="" loading="lazy" />
+            ) : (
+              <span className="cartao-tutorial-texto">
+                <b>{nomeProduto(codigo)}</b>
+                {vazio ? <Selo status="embreve" /> : <span>{p.descricao}</span>}
+              </span>
+            )}
+          </Tag>
+        )
+      })}
+    </div>
   )
 }
 
