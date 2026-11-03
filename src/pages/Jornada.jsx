@@ -35,7 +35,7 @@ export default function Jornada({ estado, hotelId }) {
 
       <h2 className="secao-titulo passo-a-passo-titulo">Passo a passo</h2>
       <ol className="passo-a-passo">
-        <CardKickoff analista={analista} />
+        <CardKickoff />
         {jornada.map((seg) => (seg.tipo === 'produto'
           ? <CardModulo key={seg.id} seg={seg} prog={prog} jornada={jornada} />
           : <CardReuniao key={seg.id} seg={seg} prog={prog} jornada={jornada} analista={analista} r={progresso.reunioes?.[seg.numero] ?? {}} />))}
@@ -128,11 +128,10 @@ function CardModulo({ seg, prog, jornada }) {
 }
 
 // Reunião inicial (kick-off): feita com a analista antes de a implantação começar, por isso já aparece realizada.
-function CardKickoff({ analista }) {
+function CardKickoff() {
   return (
-    <CardJornada st="concluido" tipo="Reunião" titulo="Reunião inicial (kick-off)"
-      texto={`Reunião de abertura${analista?.nome ? ` com sua analista ${analista.nome}` : ' com sua analista'}, antes de começar a implantação.`}
-      rodape={<span className="selo concluido">Realizada</span>} />
+    <CardJornada st="concluido" tipo="Reunião" titulo="Reunião inicial"
+      rodape={<span className="selo concluido">Concluído</span>} />
   )
 }
 
