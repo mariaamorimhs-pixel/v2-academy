@@ -1,5 +1,5 @@
 // Implantação híbrida: envia o convite de primeiro acesso para um usuário da tabela impl_usuarios.
-// Só o admin pode chamar. Se a pessoa já tem login no Supabase (ex.: equipe HSystem), envia o link
+// Admin convida qualquer um; analista só os usuários cliente dos hotéis dele. Se a pessoa já tem login no Supabase (ex.: equipe HSystem), envia o link
 // de definir senha em vez do convite. Publicar com verify_jwt ligado.
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
@@ -22,12 +22,18 @@ Deno.serve(async (req) => {
     const { data: { user } } = await comoQuemChamou.auth.getUser()
     if (!user?.email) return resposta({ erro: 'Não autenticado' }, 401)
 
-    const { data: eu } = await admin.from('impl_usuarios').select('perfil').eq('email', user.email.toLowerCase()).maybeSingle()
-    if (eu?.perfil !== 'admin') return resposta({ erro: 'Só o admin pode enviar convites' }, 403)
+    const { data: eu } = await admin.from('impl_usuarios').select('id, perfil').eq('email', user.email.toLowerCase()).maybeSingle()
+    if (eu?.perfil !== 'admin' && eu?.perfil !== 'analista') return resposta({ erro: 'Sem permissão para enviar convites' }, 403)
 
     const { usuario_id, redirect_to } = await req.json()
-    const { data: alvo } = await admin.from('impl_usuarios').select('id, email, nome').eq('id', usuario_id).maybeSingle()
+    const { data: alvo } = await admin.from('impl_usuarios').select('id, email, nome, perfil, hotel_id').eq('id', usuario_id).maybeSingle()
     if (!alvo) return resposta({ erro: 'Usuário não encontrado' }, 404)
+    if (eu.perfil === 'analista') {
+      const { data: hotel } = alvo.perfil === 'cliente' && alvo.hotel_id
+        ? await admin.from('impl_hoteis').select('analista_id').eq('id', alvo.hotel_id).maybeSingle()
+        : { data: null }
+      if (hotel?.analista_id !== eu.id) return resposta({ erro: 'O analista só convida usuários dos hotéis dele' }, 403)
+    }
 
     let tipo = 'convite'
     const { error: erroConvite } = await admin.auth.admin.inviteUserByEmail(alvo.email, {

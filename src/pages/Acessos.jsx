@@ -14,17 +14,20 @@ export const PERFIS = {
 const ORDEM = Object.keys(PERFIS)
 const normal = (t) => String(t ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
 
-export default function Acessos({ estado, euId, filtroInicial = 'todos' }) {
-  const [filtro, setFiltro] = useState(filtroInicial)
+// restrito (analista): só os usuários cliente dos hotéis dele; pode criar cliente e enviar convite, sem editar nem remover.
+export default function Acessos({ estado, euId, filtroInicial = 'todos', restrito = false }) {
+  const [filtro, setFiltro] = useState(restrito ? 'cliente' : filtroInicial)
   const [busca, setBusca] = useState('')
   const [painel, setPainel] = useState(null) // null | { novo: true, inicial? } | { id }
   const nomeHotel = (id) => estado.hoteis.find((h) => h.id === id)?.nome ?? '—'
   const hoteisDoAnalista = (id) => estado.hoteis.filter((h) => h.analistaId === id).length
-  const pendentes = analistasPendentes(estado)
+  const pendentes = restrito ? [] : analistasPendentes(estado)
+  const meusHoteis = new Set(estado.hoteis.filter((h) => h.analistaId === euId).map((h) => h.id))
 
   const lista = useMemo(() => {
     const termo = normal(busca.trim())
     return estado.usuarios
+      .filter((u) => !restrito || (u.perfil === 'cliente' && meusHoteis.has(u.hotelId)))
       .filter((u) => filtro === 'todos' || u.perfil === filtro)
       .filter((u) => !termo || normal(`${u.nome} ${u.email} ${u.hotelId ? nomeHotel(u.hotelId) : ''}`).includes(termo))
       .sort((a, b) => ORDEM.indexOf(a.perfil) - ORDEM.indexOf(b.perfil) || a.nome.localeCompare(b.nome))
@@ -40,19 +43,21 @@ export default function Acessos({ estado, euId, filtroInicial = 'todos' }) {
       <header className="cabecalho acessos-cabecalho">
         <div>
           <h1>Acessos</h1>
-          <p className="muted">Quem entra no HSystem Academy e o que cada um vê.</p>
+          <p className="muted">{restrito
+            ? 'Usuários dos seus hotéis. Crie o acesso de um cliente quando ele não vier certo do Sensedata.'
+            : 'Quem entra no HSystem Academy e o que cada um vê.'}</p>
         </div>
-        <button className="btn primario" onClick={() => setPainel({ novo: true })}><span aria-hidden="true">+</span> Novo acesso</button>
+        <button className="btn primario" onClick={() => setPainel({ novo: true })}><span aria-hidden="true">+</span> {restrito ? 'Novo usuário cliente' : 'Novo acesso'}</button>
       </header>
 
       <div className="acessos-barra">
-        <div className="abas" role="tablist" aria-label="Filtrar por perfil">
+        {!restrito && <div className="abas" role="tablist" aria-label="Filtrar por perfil">
           {['todos', ...ORDEM].map((p) => (
             <button key={p} type="button" role="tab" aria-selected={filtro === p} className={filtro === p ? 'ativa' : ''} onClick={() => setFiltro(p)}>
               {p === 'todos' ? 'Todos' : PERFIS[p].plural} <span className="abas-numero">{contagem(p)}</span>
             </button>
           ))}
-        </div>
+        </div>}
         <label className="acessos-busca">
           <span className="sr-only">Buscar por nome, e-mail ou hotel</span>
           <input type="search" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar nome, e-mail ou hotel" />
@@ -87,7 +92,7 @@ export default function Acessos({ estado, euId, filtroInicial = 'todos' }) {
       </div>
 
       {painel && (
-        <PainelAcesso key={painel.id ?? 'novo'} estado={estado} euId={euId} usuario={selecionado} inicial={painel.inicial}
+        <PainelAcesso key={painel.id ?? 'novo'} estado={estado} euId={euId} restrito={restrito} usuario={selecionado} inicial={painel.inicial}
           hoteisDoAnalista={selecionado ? hoteisDoAnalista(selecionado.id) : 0} onFechar={() => setPainel(null)} />
       )}
     </>
@@ -117,16 +122,17 @@ function AvisoPendentes({ pendentes, onCadastrar }) {
 const calendlyValido = (url) => !url.trim() || /^https:\/\/calendly\.com\/[\w-]+/.test(url.trim())
 
 // Painel lateral: cria um acesso novo ou edita/remove um existente.
-function PainelAcesso({ estado, euId, usuario, inicial, hoteisDoAnalista, onFechar }) {
+function PainelAcesso({ estado, euId, restrito, usuario, inicial, hoteisDoAnalista, onFechar }) {
   const novo = !usuario
   const [form, setForm] = useState(() => usuario
     ? { nome: usuario.nome, email: usuario.email, perfil: usuario.perfil, hotelId: usuario.hotelId ?? '', calendly: usuario.calendly ?? '' }
-    : { nome: '', email: '', perfil: 'analista', hotelId: '', calendly: '', ...inicial })
+    : { nome: '', email: '', perfil: restrito ? 'cliente' : 'analista', hotelId: '', calendly: '', ...inicial })
   const [convidar, setConvidar] = useState(true)
   const [salvando, setSalvando] = useState(false)
   const caixa = useRef(null)
   const campo = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
-  const hoteis = [...estado.hoteis].sort((a, b) => a.nome.localeCompare(b.nome))
+  const hoteis = estado.hoteis.filter((h) => !restrito || h.analistaId === euId).sort((a, b) => a.nome.localeCompare(b.nome))
+  const soLeitura = restrito && !novo
   const souEu = !!usuario && usuario.id === euId
 
   useEffect(() => {
@@ -170,19 +176,28 @@ function PainelAcesso({ estado, euId, usuario, inicial, hoteisDoAnalista, onFech
       <aside className="painel-lateral" role="dialog" aria-modal="true" aria-labelledby="painel-titulo" ref={caixa}>
         <header className="painel-topo">
           <div>
-            <h2 id="painel-titulo">{novo ? 'Novo acesso' : usuario.nome}</h2>
+            <h2 id="painel-titulo">{novo ? (restrito ? 'Novo usuário cliente' : 'Novo acesso') : usuario.nome}</h2>
             {!novo && <span className="muted pequeno">{PERFIS[usuario.perfil]?.rotulo}{usuario.perfil === 'analista' ? ` · ${hoteisDoAnalista} ${hoteisDoAnalista === 1 ? 'hotel' : 'hotéis'}` : ''}</span>}
           </div>
           <button type="button" className="painel-fechar" onClick={onFechar} aria-label="Fechar"><Icone nome="fechar" /></button>
         </header>
 
         <form className="painel-corpo" onSubmit={salvar} id="form-acesso">
-          <label>Perfil
-            <select value={form.perfil} onChange={campo('perfil')} disabled={souEu}>
-              {ORDEM.map((p) => <option key={p} value={p}>{PERFIS[p].rotulo}</option>)}
-            </select>
-            <span className="muted pequeno">{souEu ? 'Você não pode mudar o seu próprio perfil.' : PERFIS[form.perfil].descricao}</span>
-          </label>
+          {soLeitura ? (
+            <dl className="painel-dados">
+              <div><dt>E-mail</dt><dd>{usuario.email}</dd></div>
+              <div><dt>Hotel</dt><dd>{estado.hoteis.find((h) => h.id === usuario.hotelId)?.nome ?? '—'}</dd></div>
+              <p className="muted pequeno">Para corrigir nome ou e-mail, fale com um admin.</p>
+            </dl>
+          ) : <>
+          {!restrito && (
+            <label>Perfil
+              <select value={form.perfil} onChange={campo('perfil')} disabled={souEu}>
+                {ORDEM.map((p) => <option key={p} value={p}>{PERFIS[p].rotulo}</option>)}
+              </select>
+              <span className="muted pequeno">{souEu ? 'Você não pode mudar o seu próprio perfil.' : PERFIS[form.perfil].descricao}</span>
+            </label>
+          )}
           <label>Nome<input required value={form.nome} onChange={campo('nome')} autoComplete="off" /></label>
           <label>E-mail
             <input type="email" required value={form.email} onChange={campo('email')} autoComplete="off" />
@@ -192,7 +207,7 @@ function PainelAcesso({ estado, euId, usuario, inicial, hoteisDoAnalista, onFech
             <label>Hotel
               <select required value={form.hotelId} onChange={campo('hotelId')}>
                 <option value="">Escolha o hotel</option>
-                {hoteis.map((h) => <option key={h.id} value={h.id}>{h.nome}{h.teste ? ' (teste)' : ''}</option>)}
+                {hoteis.map((h) => <option key={h.id} value={h.id}>{h.nome}{h.teste && !h.nome.includes('(teste)') ? ' (teste)' : ''}</option>)}
               </select>
             </label>
           )}
@@ -210,6 +225,7 @@ function PainelAcesso({ estado, euId, usuario, inicial, hoteisDoAnalista, onFech
               Enviar o convite por e-mail agora
             </label>
           )}
+          </>}
 
           {!novo && (
             <section className="painel-secao">
@@ -221,12 +237,14 @@ function PainelAcesso({ estado, euId, usuario, inicial, hoteisDoAnalista, onFech
         </form>
 
         <footer className="painel-rodape">
-          {!novo && !souEu && <button type="button" className="btn fantasma painel-remover" onClick={remover}>Remover acesso</button>}
+          {!novo && !souEu && !restrito && <button type="button" className="btn fantasma painel-remover" onClick={remover}>Remover acesso</button>}
           <span className="painel-rodape-acoes">
-            <button type="button" className="btn fantasma" onClick={onFechar}>Cancelar</button>
-            <button type="submit" form="form-acesso" className="btn primario" disabled={!pode || !mudou || salvando}>
-              {salvando ? 'Salvando…' : novo ? 'Criar acesso' : 'Salvar'}
-            </button>
+            <button type="button" className="btn fantasma" onClick={onFechar}>{soLeitura ? 'Fechar' : 'Cancelar'}</button>
+            {!soLeitura && (
+              <button type="submit" form="form-acesso" className="btn primario" disabled={!pode || !mudou || salvando}>
+                {salvando ? 'Salvando…' : novo ? 'Criar acesso' : 'Salvar'}
+              </button>
+            )}
           </span>
         </footer>
       </aside>

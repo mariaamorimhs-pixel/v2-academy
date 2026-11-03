@@ -24,7 +24,9 @@ Escopo completo: documento "Escopo — Implantação Híbrida HSystem" (Claude D
 - **Admin**: acesso a tudo. Em **Acessos** (que inclui os analistas e o Calendly deles) cria, edita, troca o perfil e
   remove acessos de admin, analista ou usuário de um hotel (`supabase/10_editar_acessos.sql`)
   (função `impl_criar_acesso`) e envia o convite por e-mail.
-- **Analista**: Dashboard e "Meus hotéis", só com os hotéis em que ele é o analista (regras do banco).
+- **Analista**: Dashboard, "Meus hotéis" e Visão do hotel, só com os hotéis dele (regras do banco). Em **Acessos** vê os
+  usuários cliente dos hotéis dele, cria usuário cliente e envia convite (`supabase/11_analista_cria_cliente.sql`).
+  Na página do hotel e na lista copia o link de onde o cliente parou (ou a mensagem pronta) para mandar ao cliente.
 - **Visão do hotel** (admin e analista): busca um hotel e mostra o sistema como o cliente vê, só para olhar
   (botões de concluir, agendar e se inscrever desativados). O analista só encontra os hotéis dele.
 - **Cliente**: a implantação do próprio hotel.

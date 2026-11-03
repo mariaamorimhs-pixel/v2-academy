@@ -76,7 +76,7 @@ export function FaixaVisao({ estado, hotel, onEscolher }) {
       <label className="faixa-visao-troca">
         <span className="sr-only">Trocar de hotel</span>
         <select value={hotel.id} onChange={(e) => onEscolher(e.target.value)}>
-          {hoteis.map((h) => <option key={h.id} value={h.id}>{h.nome}{h.teste ? ' (teste)' : ''}</option>)}
+          {hoteis.map((h) => <option key={h.id} value={h.id}>{h.nome}{h.teste && !h.nome.includes('(teste)') ? ' (teste)' : ''}</option>)}
         </select>
       </label>
       <button className="btn pequeno" onClick={() => onEscolher(null)}>Sair da visão</button>

@@ -783,3 +783,8 @@ html[data-tema="escuro"] .recolhido .lateral-marca { padding: 0 4px; }
 .onde-parou p { margin: 0; }
 .onde-parou-etapa { font-weight: 600; }
 .onde-parou-link { overflow-wrap: anywhere; }
+.painel-dados { margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.painel-dados div { display: flex; flex-direction: column; gap: 2px; }
+.painel-dados dt { font-size: 13px; font-weight: 500; color: var(--muted); }
+.painel-dados dd { margin: 0; }
+.painel-dados p { margin: 0; }

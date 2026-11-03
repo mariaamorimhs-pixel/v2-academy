@@ -44,6 +44,7 @@ const MENU = {
       { rota: '', rotulo: 'Dashboard', icone: 'dashboard' }, { rota: 'hoteis', rotulo: 'Meus hotéis', icone: 'hoteis' },
       { rota: 'visao', rotulo: 'Visão do hotel', icone: 'visao' },
     ] },
+    { titulo: 'Gestão', itens: [{ rota: 'acessos', rotulo: 'Acessos', icone: 'acessos' }] },
   ],
   admin: [
     { titulo: 'Acompanhamento', itens: [
@@ -143,6 +144,7 @@ export default function App() {
     conteudo = pagina === 'hotel' ? <Hotel estado={estado} usuario={usuario} hotelId={param} onSimular={simular} />
       : pagina === 'visao' ? <VisaoHotel estado={estado} onEscolher={simular} />
       : pagina === 'hoteis' ? <Hoteis estado={estado} usuario={usuario} />
+      : pagina === 'acessos' ? <Acessos estado={estado} euId={eu.id} restrito />
       : <Dashboard estado={estado} usuario={usuario} />
   } else {
     conteudo =
