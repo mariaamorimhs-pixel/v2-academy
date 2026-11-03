@@ -9,7 +9,6 @@ import Reuniao from './pages/Reuniao.jsx'
 import Hoteis from './pages/Hoteis.jsx'
 import Hotel from './pages/Hotel.jsx'
 import Editor from './pages/Editor.jsx'
-import Analistas from './pages/Analistas.jsx'
 import Inicio from './pages/Inicio.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import Acessos from './pages/Acessos.jsx'
@@ -52,7 +51,7 @@ const MENU = {
       { rota: 'visao', rotulo: 'Visão do hotel', icone: 'visao' },
     ] },
     { titulo: 'Conteúdo', itens: [{ rota: '', rotulo: 'Trilhas', icone: 'conteudo' }, { rota: 'gravacoes', rotulo: 'Gravações', icone: 'gravados' }, { rota: 'pesquisas', rotulo: 'Pesquisas', icone: 'pesquisas' }] },
-    { titulo: 'Gestão', itens: [{ rota: 'analistas', rotulo: 'Analistas', icone: 'analistas' }, { rota: 'acessos', rotulo: 'Acessos', icone: 'acessos' }] },
+    { titulo: 'Gestão', itens: [{ rota: 'acessos', rotulo: 'Acessos', icone: 'acessos' }] },
   ],
 }
 const PAPEL = { cliente: 'Cliente', analista: 'Analista', admin: 'Admin' }
@@ -63,7 +62,7 @@ function tituloDaAba(perfil, pagina) {
     ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'Minha implantação' : ['tutoriais', 'tutorial'].includes(pagina) ? 'Tutoriais'
       : pagina === 'ao-vivo' ? 'Ao vivo' : pagina === 'gravados' ? 'Gravados' : 'Início')
     : pagina === 'hoteis' || pagina === 'hotel' ? (perfil === 'analista' ? 'Meus hotéis' : 'Hotéis')
-    : pagina === 'analistas' ? 'Analistas' : pagina === 'acessos' ? 'Acessos' : pagina === 'visao' ? 'Visão do hotel' : pagina === 'pesquisas' ? 'Pesquisas' : pagina === 'gravacoes' ? 'Gravações'
+    : pagina === 'analistas' || pagina === 'acessos' ? 'Acessos' : pagina === 'visao' ? 'Visão do hotel' : pagina === 'pesquisas' ? 'Pesquisas' : pagina === 'gravacoes' ? 'Gravações'
     : pagina === 'dashboard' || (perfil === 'analista' && !pagina) ? 'Dashboard' : 'Trilhas'
   return `${nome} · HSystem Academy`
 }
@@ -148,8 +147,8 @@ export default function App() {
   } else {
     conteudo =
       pagina === 'hoteis' ? <Hoteis estado={estado} usuario={usuario} todos />
-      : pagina === 'analistas' ? <Analistas estado={estado} />
-      : pagina === 'acessos' ? <Acessos estado={estado} />
+      : pagina === 'analistas' ? <Acessos estado={estado} euId={eu.id} filtroInicial="analista" />
+      : pagina === 'acessos' ? <Acessos estado={estado} euId={eu.id} />
       : pagina === 'pesquisas' ? <Pesquisas rota={rota} />
       : pagina === 'gravacoes' ? <Gravacoes estado={estado} />
       : pagina === 'visao' ? <VisaoHotel estado={estado} onEscolher={simular} />
@@ -163,7 +162,8 @@ export default function App() {
     ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'implantacao'
       : pagina === 'tutorial' ? 'tutoriais' : ['ao-vivo', 'tutoriais', 'gravados'].includes(pagina) ? pagina : '')
     : pagina === 'hoteis' || pagina === 'hotel' ? 'hoteis'
-    : ['analistas', 'acessos', 'dashboard', 'visao', 'pesquisas', 'gravacoes'].includes(pagina) ? pagina : ''
+    : pagina === 'analistas' ? 'acessos'
+    : ['acessos', 'dashboard', 'visao', 'pesquisas', 'gravacoes'].includes(pagina) ? pagina : ''
 
   const nomeTela = tituloDaAba(usuario.perfil, pagina).split(' · ')[0]
   return (

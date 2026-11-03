@@ -69,7 +69,7 @@ export default function PainelSensedata({ estado }) {
         <div className="alerta aviso-analista" role="status">
           <b>⚠ {pendentes.length} analista(s) do Sensedata ainda não cadastrado(s) no Academy.</b> Os hotéis deles ficam sem analista até você cadastrar.
           <ul>{pendentes.map((p) => <li key={p.email}>{p.nome} ({p.email}) · {p.hoteis.length} hotel(éis)</li>)}</ul>
-          <a className="btn" href="#/analistas">Cadastrar em Analistas</a>
+          <a className="btn" href="#/acessos">Cadastrar em Acessos</a>
         </div>
       )}
 

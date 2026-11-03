@@ -21,7 +21,8 @@ Escopo completo: documento "Escopo — Implantação Híbrida HSystem" (Claude D
   O admin pode "Ver como o cliente" de qualquer hotel e zerar o progresso dos hotéis de teste.
 
 ## Níveis de acesso (`supabase/06_acessos.sql`)
-- **Admin**: acesso a tudo. Na aba **Acessos** cria acessos de admin, analista ou usuário de um hotel
+- **Admin**: acesso a tudo. Em **Acessos** (que inclui os analistas e o Calendly deles) cria, edita, troca o perfil e
+  remove acessos de admin, analista ou usuário de um hotel (`supabase/10_editar_acessos.sql`)
   (função `impl_criar_acesso`) e envia o convite por e-mail.
 - **Analista**: Dashboard e "Meus hotéis", só com os hotéis em que ele é o analista (regras do banco).
 - **Visão do hotel** (admin e analista): busca um hotel e mostra o sistema como o cliente vê, só para olhar

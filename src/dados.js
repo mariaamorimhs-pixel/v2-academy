@@ -102,16 +102,16 @@ export const salvarConteudo = (passoId, d) =>
 
 export const restaurarConteudo = (passoId) => acao('impl_restaurar_conteudo', { p_passo: passoId })
 
-export const salvarAnalista = (id, nome, email, calendly) =>
-  acao('impl_salvar_analista', { p_id: id ?? null, p_nome: nome, p_email: email, p_calendly: calendly })
-
-// Novo acesso (só admin): perfil 'admin' | 'analista' | 'cliente' (cliente precisa do hotel). Devolve o id.
-export async function criarAcesso({ nome, email, perfil, hotelId }) {
-  const { data, error } = await supabase.rpc('impl_criar_acesso', { p_nome: nome, p_email: email, p_perfil: perfil, p_hotel: hotelId || null })
+// Acessos (só admin). perfil: 'admin' | 'analista' | 'cliente' (cliente precisa do hotel; analista pode ter Calendly).
+export async function criarAcesso({ nome, email, perfil, hotelId, calendly }) {
+  const { data, error } = await supabase.rpc('impl_criar_acesso', { p_nome: nome, p_email: email, p_perfil: perfil, p_hotel: hotelId || null, p_calendly: calendly || null })
   if (error) throw new Error(error.message)
   await recarregar()
   return data
 }
+export const atualizarAcesso = (id, { nome, email, perfil, hotelId, calendly }) =>
+  acao('impl_atualizar_acesso', { p_id: id, p_nome: nome, p_email: email, p_perfil: perfil, p_hotel: hotelId || null, p_calendly: calendly || null })
+export const removerAcesso = (id) => acao('impl_remover_acesso', { p_id: id })
 
 // Treinamentos gravados (só admin cadastra).
 export const salvarGravacao = (id, g) =>

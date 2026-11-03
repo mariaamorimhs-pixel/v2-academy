@@ -2,7 +2,7 @@ import { dadosDoHotel, Barra, Marca, Selo, fmtDataHora, fmtData, nomeReuniao, as
 import { nomeProduto } from '../trilhas.js'
 import { avaliarContrato } from '../regras.js'
 import { marcarReuniaoRealizada, zerarHotelTeste } from '../dados.js'
-import { BotaoConvite } from './Analistas.jsx'
+import { BotaoConvite } from './Acessos.jsx'
 import { situacaoDoHotel } from './Hoteis.jsx'
 
 // Detalhe do hotel para o analista: contratos lidos do Sensedata, usuários, progresso por produto
