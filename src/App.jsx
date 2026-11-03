@@ -36,7 +36,7 @@ const MENU = {
   cliente: [
     { titulo: 'Implantação', itens: [{ rota: '', rotulo: 'Início', icone: 'inicio' }, { rota: 'implantacao', rotulo: 'Minha implantação', icone: 'implantacao' }] },
     { titulo: 'Treinamentos', itens: [
-      { rota: 'ao-vivo', rotulo: 'Ao vivo em grupo', icone: 'aovivo' }, { rota: 'tutoriais', rotulo: 'Tutoriais', icone: 'tutoriais' },
+      { rota: 'ao-vivo', rotulo: 'Ao vivo', icone: 'aovivo' }, { rota: 'tutoriais', rotulo: 'Tutoriais', icone: 'tutoriais' },
       { rota: 'gravados', rotulo: 'Gravados', icone: 'gravados' },
     ] },
   ],
@@ -61,7 +61,7 @@ const PAPEL = { cliente: 'Cliente', analista: 'Analista', admin: 'Admin' }
 function tituloDaAba(perfil, pagina) {
   const nome = perfil === 'cliente'
     ? (['implantacao', 'produto', 'passo', 'reuniao'].includes(pagina) ? 'Minha implantação' : ['tutoriais', 'tutorial'].includes(pagina) ? 'Tutoriais'
-      : pagina === 'ao-vivo' ? 'Ao vivo em grupo' : pagina === 'gravados' ? 'Gravados' : 'Início')
+      : pagina === 'ao-vivo' ? 'Ao vivo' : pagina === 'gravados' ? 'Gravados' : 'Início')
     : pagina === 'hoteis' || pagina === 'hotel' ? (perfil === 'analista' ? 'Meus hotéis' : 'Hotéis')
     : pagina === 'analistas' ? 'Analistas' : pagina === 'acessos' ? 'Acessos' : pagina === 'visao' ? 'Visão do hotel' : pagina === 'pesquisas' ? 'Pesquisas' : pagina === 'gravacoes' ? 'Gravações'
     : pagina === 'dashboard' || (perfil === 'analista' && !pagina) ? 'Dashboard' : 'Trilhas'
